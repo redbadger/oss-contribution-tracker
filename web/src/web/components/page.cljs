@@ -6,9 +6,6 @@
 (defui Page
   Object
   (render [this]
-    (dom/div nil [(dom/h1 nil "OSS Contribution Tracker")
-                  (contributions)])))
-
-
-
-(def page (om/factory Page))
+    (dom/div nil
+      (dom/h1 nil "OSS Contribution Tracker")
+      (contributions (om/props this)))))
