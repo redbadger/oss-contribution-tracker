@@ -13,7 +13,6 @@
 (defui Contributions
   Object
   (render [this]
-    (println (om/props this))
     (let [{c :contributions} (om/props this)]
       (dom/div nil
         (dom/h2 nil "Contributions")

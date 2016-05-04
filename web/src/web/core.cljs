@@ -8,9 +8,11 @@
 
 (enable-console-print!)
 
+(def day (-> 1000 (* 60) (* 60) (* 24)))
+
 (defn mock-contribution
   [seed]
-  (let [date (-> seed (* 1000) (* 60) (* 60) (* 24) (+ 1450000000000))]
+  (let [date (-> seed (* day) (+ 1450000000000))]
     { :id seed
       :user (format "Test User %d" seed)
       :repository (format "Test Repository %d" seed)
@@ -21,7 +23,7 @@
       :url "https://github.com/redbadger/oss-contribution-tracker.git" }))
 
 (def app-state
-  (atom {:contributions (map mock-contribution (range 0 5))}))
+  (atom {:contributions (map mock-contribution (range 0 100))}))
 
 (def reconciler
   (om/reconciler {:state app-state}))
