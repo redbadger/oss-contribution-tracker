@@ -1,6 +1,6 @@
 (ns web.components.chart
-  (:require [om.next :as om :refer-macros [defui]]
-            [om.dom :as dom]))
+  (:require [om.dom :as dom]
+            [om.next :as om :refer-macros [defui]]))
 
 (def width 320)
 

@@ -1,8 +1,8 @@
 (ns web.components.contributions
   (:require [cljs-time.coerce :as coerce]
             [cljs-time.core :as time]
-            [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
+            [om.next :as om :refer-macros [defui]]
             [web.components.chart :refer (chart)]))
 
 (def day
