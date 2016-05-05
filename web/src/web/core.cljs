@@ -8,9 +8,9 @@
 
 (enable-console-print!)
 
-(def day (* 24 hour))
+(def hour (* 60 (* 60 1000)))
 
-(def hour (-> 1000 (* 60) (* 60)))
+(def day (* 24 hour))
 
 (def app-state
   (atom {:contributions (gen/sample fixtures/contribution 25)}))
