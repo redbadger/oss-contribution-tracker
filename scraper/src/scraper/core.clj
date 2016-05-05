@@ -1,6 +1,2 @@
-(ns scraper.core)
-
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(ns scraper.core
+  (:require [scraper.github-client :as github]))
