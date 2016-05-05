@@ -25,6 +25,14 @@
       (let [res (gh {:path (str "/orgs/" org "/members") :query {:per_page 500}})]
         (into [] (map :login res))))))
 
+(defn user-public-repos
+  "fetches members of an organisation"
+  [http-get]
+  (let [gh (request http-get)]
+    (fn [user]
+      (let [res (gh {:path (str "/users/" user "/repos") :query {:per_page 500}})]
+        (into [] (map :name (filter #(not (or (:private %) (:fork %))) res)))))))
+
 ; (defn request
 ;   "Starts a go block that takes requests on a channel and responds to the channel
 ;   in the request"

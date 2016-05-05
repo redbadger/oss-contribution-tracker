@@ -26,3 +26,15 @@
   (let [org-mem (gh/org-members org-get)
         members (org-mem "redbadger")]
     (is (= members ["ajcumine" "AmyBadger"]))))
+
+(defn user-repos [url options]
+  (let [p (promise)]
+    (deliver p {:status 200
+                :headers {}
+                :body (slurp "test/scraper/fixtures/user-repos.json")})))
+
+(deftest gets-users-repos
+  "client gets user's repos"
+  (let [usr-rep (gh/user-public-repos user-repos)
+        repos (usr-rep "charypar")]
+    (is (= repos ["comp" "cyclical"]))))
