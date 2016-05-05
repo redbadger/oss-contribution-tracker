@@ -4,4 +4,5 @@
                  [figwheel-sidecar "0.5.0-SNAPSHOT" :scope "test"]
                  [org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.8.51"]
+                 [org.clojure/test.check "0.9.0"]
                  [org.omcljs/om "1.0.0-alpha34"]])

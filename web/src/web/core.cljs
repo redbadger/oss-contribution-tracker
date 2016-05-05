@@ -1,29 +1,19 @@
 (ns web.core
-  (:require [cljs-time.coerce :as time]
-            [goog.dom :as gdom]
-            [goog.string :refer (format)]
+  (:require [goog.dom :as gdom]
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
-            [web.components.page :refer (Page)]))
+            [web.components.page :refer (Page)]
+            [web.fixtures :as fixtures]
+            [clojure.test.check.generators :as gen]))
 
 (enable-console-print!)
 
-(def day (-> 1000 (* 60) (* 60) (* 24)))
+(def day (* 24 hour))
 
-(defn mock-contribution
-  [seed]
-  (let [date (-> seed (* day) (+ 1450000000000))]
-    { :id seed
-      :user (format "Test User %d" seed)
-      :repository (format "Test Repository %d" seed)
-      :dateCreated (time/from-long date)
-      :datePublic (time/from-long date)
-      :type :contribution/commit
-      :languages [ "Javascript" ]
-      :url "https://github.com/redbadger/oss-contribution-tracker.git" }))
+(def hour (-> 1000 (* 60) (* 60)))
 
 (def app-state
-  (atom {:contributions (map mock-contribution (range 0 100))}))
+  (atom {:contributions (gen/sample fixtures/contribution 25)}))
 
 (def reconciler
   (om/reconciler {:state app-state}))

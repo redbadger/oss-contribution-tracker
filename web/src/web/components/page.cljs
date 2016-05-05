@@ -6,6 +6,8 @@
 (defui Page
   Object
   (render [this]
-    (dom/div nil
-      (dom/h1 nil "OSS Contribution Tracker")
-      (contributions (om/props this)))))
+    (let [{c :contributions} (om/props this)]
+      (dom/div nil
+        (dom/h1 nil "OSS Contribution Tracker")
+        (contributions {:contributions c
+                        :label "Red Badger Contributions"})))))
