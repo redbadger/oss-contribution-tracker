@@ -7,7 +7,7 @@
   "Contribution generator"
   (gen/hash-map
     :id gen/uuid
-    :user gen/string-ascii
+    :user (gen/elements [ "User A", "User B", "User C", "User D", "User E" ])
     :repository gen/string-ascii
     :dateCreated (gen/fmap time/from-long (gen/choose 1449000000000 1450000000000))
     :datePublic (gen/fmap time/from-long (gen/choose 1449000000000 1450000000000))
