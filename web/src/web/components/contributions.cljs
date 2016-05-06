@@ -27,7 +27,7 @@
   (* 24 (* 60 (* 60 1000))))
 
 (defn days
-  [{date :dateCreated id :id}]
+  [{date :contribution/date-created id :contribution/id}]
   (int (Math/floor (/ (coerce/to-long date) day))))
 
 (defn toValues
@@ -35,7 +35,7 @@
   {:value (count value) :label key })
 
 (defn contribution
-  [{dateCreated :dateCreated uuid :id user :user}]
+  [{dateCreated :contribution/date-created uuid :contribution/id user :contribution/user}]
   (let [id (str uuid)
         date (coerce/to-string dateCreated)]
     (dom/ul #js {:key id}
@@ -46,7 +46,7 @@
 (defui Contributions
   Object
   (render [this]
-    (let [{c :contributions label :label} (om/props this)
+    (let [{c :contributions/list label :label} (om/props this)
           points (sort-by :label (map toValues (seq (group-by days c))))]
       (dom/div #js {:style s-container}
         (dom/div #js {:style s-title-container}

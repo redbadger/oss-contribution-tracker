@@ -1,7 +1,7 @@
 (ns web.components.app
   (:require [om.dom :as dom]
             [om.next :as om :refer-macros [defui]]
-            [web.components.contributions :refer (contributions)]
+            [web.components.contributions :refer (Contributions contributions)]
             [web.styles :as styles]))
 
 (def s-app
@@ -14,10 +14,16 @@
   (clj->js styles/f2))
 
 (defui App
+  static om/IQuery
+  (query [this]
+    `[({:contributions/list [:contribution/id
+                             :contribution/date-created
+                             :contribution/user]}
+       {:user "User B"})])
   Object
   (render [this]
-    (let [{c :contributions} (om/props this)]
+    (let [{c :contributions/list} (om/props this)]
       (dom/div #js {:style s-app}
         (dom/h1 #js {:style s-title} "OSS Contribution Tracker")
-        (contributions {:contributions c
+        (contributions {:contributions/list c
                         :label "Red Badger"})))))
