@@ -111,13 +111,25 @@
         issues (usr-issues {:user "charypar"})
         expected [{:repo "redbadger/oss-contribution-tracker"
                    :user "charypar"
-                   :issue {:type :pull_request, :url "https://github.com/redbadger/oss-contribution-tracker/pull/1"}}
+                   :issue {:type :pull_request :url "https://github.com/redbadger/oss-contribution-tracker/pull/1"}}
                   {:repo "dowjones/react-json-schema-proptypes"
                    :user "charypar"
-                   :issue {:type :issue, :url "https://github.com/dowjones/react-json-schema-proptypes/issues/2"}}]]
+                   :issue {:type :issue :url "https://github.com/dowjones/react-json-schema-proptypes/issues/2"}}]]
     (is (= issues expected))))
 
-; (deftest gets-repos-master-commits-by-user
-;   "client can get commits in the default branch by a user"
-;   (let [repo-commits (gh/repo-commits (gh/request repo-commits))
-;         commits (repo-commits "charypar")]))
+(defn repo-commits [url options]
+  (let [p (promise)]
+    (is (= url "https://api.github.com/repos/redbadger/oss-contribution-tracker/commits"))
+    (is (= (:query-params options) {:author "charypar" :per_page 100}))
+    (deliver p {:status 200
+                :headers {}
+                :body (slurp "test/scraper/fixtures/repo-commits.json")})))
+
+(deftest gets-repos-master-commits-by-user
+  "client can get commits in the default branch by a user"
+  (let [repo-commits (gh/repo-commits (gh/request repo-commits))
+        commits (repo-commits {:user "charypar" :repo "redbadger/oss-contribution-tracker"})
+        expected [{:user "charypar"
+                   :commit {:message "Initial commit with a scraper library skeleton"
+                            :url "https://github.com/redbadger/oss-contribution-tracker/commit/ce820f8f2b4a2829277fea52df73da055ba13ea1" }}]]
+    (is (= commits expected))))

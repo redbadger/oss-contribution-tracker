@@ -100,7 +100,7 @@
         pr? (:pull_request issue)
         type (if pr? :pull_request :issue)
         url (if pr? (:html_url (:pull_request issue)) (:html_url issue))]
-    {:repo repo :user user :issue { :type type :url url}}))
+    {:repo repo :user user :issue {:type type :url url}}))
 
 (defn user-issues
   "fetches user's public issues and PRs across github"
@@ -110,3 +110,17 @@
           res (gh {:path (str "/search/issues") :query {:q query :per_page 100}})
           ]
       (into [] (map parse-issue (:items res))))))
+
+(defn parse-commit
+  [user commit]
+  {:user user
+   :commit {:message (:message (:commit commit)) :url (:html_url commit)}})
+
+(defn repo-commits
+  "fetches user's public issues and PRs across github"
+  [gh]
+  (fn [{user :user repo :repo :as record}]
+    (let [query (str "author:" user)
+          res (gh {:path (str "/repos/" repo "/commits") :query {:author user :per_page 100}})
+          ]
+      (into [] (map (partial parse-commit user) res)))))
