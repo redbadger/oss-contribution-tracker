@@ -25,6 +25,12 @@
   [{:user user :issue issue}
    {:user user :repo repo}])
 
+(defn process-contribution
+  [{:keys [user issue commit]}]
+  (if commit
+    (merge {:user user :type :commit } commit)
+    (merge {:user user :type :issue } issue)))
+
 (def tx-stack
   (comp
     (mapcat (github/org-members gh))
@@ -33,7 +39,8 @@
     (mapcat process-user)
     (mapcat (pass-through :org (github/org-public-repos gh)))
     (mapcat (pass-through :issue split-issue))
-    (mapcat (pass-through :repo (github/repo-commits gh)))))
+    (mapcat (pass-through :repo (github/repo-commits gh)))
+    (map process-contribution)))
 
 (defn -main []
   (doseq [contribs (sequence tx-stack [{:org "redbadger"}])]

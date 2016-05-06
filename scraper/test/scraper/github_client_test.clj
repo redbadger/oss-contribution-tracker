@@ -111,7 +111,7 @@
         issues (usr-issues {:user "charypar"})
         expected [{:repo "redbadger/oss-contribution-tracker"
                    :user "charypar"
-                   :issue {:type :pull_request :url "https://github.com/redbadger/oss-contribution-tracker/pull/1"}}
+                   :issue {:type :pull-request :url "https://github.com/redbadger/oss-contribution-tracker/pull/1"}}
                   {:repo "dowjones/react-json-schema-proptypes"
                    :user "charypar"
                    :issue {:type :issue :url "https://github.com/dowjones/react-json-schema-proptypes/issues/2"}}]]

@@ -98,7 +98,7 @@
   (let [repo (repo-from-url (:repository_url issue))
         user (:login (:user issue))
         pr? (:pull_request issue)
-        type (if pr? :pull_request :issue)
+        type (if pr? :pull-request :issue)
         url (if pr? (:html_url (:pull_request issue)) (:html_url issue))]
     {:repo repo :user user :issue {:type type :url url}}))
 
