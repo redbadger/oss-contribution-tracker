@@ -2,7 +2,11 @@
   (:require [om.dom :as dom]
             [om.next :as om :refer-macros [defui]]))
 
-(def width 320)
+(def s-chart
+  (clj->js {:backgroundColor "#EEE"
+            :borderRadius "8px"}))
+
+(def width 480)
 
 (def height 160)
 
@@ -24,7 +28,7 @@
   Object
   (render [this]
     (let [{points :points} (om/props this)]
-      (dom/svg #js {:width width :height height}
+      (dom/svg #js {:width width :height height :style s-chart}
         (dom/g nil (map-indexed (partial toSVGPoints width height (count points)) points))))))
 
 (def chart (om/factory Chart))
