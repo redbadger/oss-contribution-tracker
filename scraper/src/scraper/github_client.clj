@@ -53,28 +53,35 @@
   [gh]
   (fn [org]
     (let [res (gh {:path (str "/orgs/" org "/members") :query {:per_page 100}})]
-      (into [] (map :login res)))))
-
-(defn user-public-repos
-  "fetches user's public repos"
-  [gh]
-  (fn [user]
-    (let [res (gh {:path (str "/users/" user "/repos") :query {:per_page 100}})]
-      (into [] (map :full_name (filter #(not (or (:private %) (:fork %))) res))))))
+      (into [] (map (fn [it] {:user (:login it)}) res)))))
 
 (defn user-orgs
   "fetches organisation a user publicly belongs to"
   [gh]
   (fn [user]
     (let [res (gh {:path (str "/users/" user "/orgs") :query {:per_page 100}})]
-      (into [] (map :login res)))))
+      (into [] (map (fn [it] {:org (:login it)}) res)))))
+
+(defn parse-repos
+  [repos]
+  (let [tx (comp
+             (filter #(not (or (:private %) (:fork %))))
+             (map (fn [repo] {:repo (:full_name repo)})))]
+    (into [] (sequence tx repos))))
+
+(defn user-public-repos
+  "fetches user's public repos"
+  [gh]
+  (fn [user]
+    (let [res (gh {:path (str "/users/" user "/repos") :query {:per_page 100}})]
+      (parse-repos res))))
 
 (defn org-public-repos
   "fetches public repos of an organisation"
   [gh]
   (fn [org]
     (let [res (gh {:path (str "/orgs/" org "/repos") :query {:per_page 100 :type "public"}})]
-      (into [] (map :full_name (filter #(not (:fork %)) res))))))
+      (parse-repos res))))
 
 (defn repo-from-url
   [url]
@@ -89,10 +96,11 @@
 (defn parse-issue
   [issue]
   (let [repo (repo-from-url (:repository_url issue))
+        user (:login (:user issue))
         pr? (:pull_request issue)
         type (if pr? :pull_request :issue)
         url (if pr? (:html_url (:pull_request issue)) (:html_url issue))]
-    {:repo repo :issue { :type type :url url}}))
+    {:repo repo :user user :issue { :type type :url url}}))
 
 (defn user-issues
   "fetches user's public issues and PRs across github"

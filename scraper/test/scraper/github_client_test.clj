@@ -51,7 +51,7 @@
   "client gets org members"
   (let [org-mem (gh/org-members (gh/request org-get))
         members (org-mem "redbadger")]
-    (is (= members ["ajcumine" "AmyBadger"]))))
+    (is (= members [{:user "ajcumine"} {:user "AmyBadger"}]))))
 
 (defn user-repos [url options]
   (let [p (promise)]
@@ -64,7 +64,7 @@
   "client gets user's repos"
   (let [usr-rep (gh/user-public-repos (gh/request user-repos))
         repos (usr-rep "charypar")]
-    (is (= repos ["charypar/comp" "charypar/cyclical"]))))
+    (is (= repos [{:repo "charypar/comp"} {:repo "charypar/cyclical"}]))))
 
 (defn user-orgs [url options]
   (let [p (promise)]
@@ -77,7 +77,7 @@
   "client gets user's organisations"
   (let [usr-orgs (gh/user-orgs (gh/request user-orgs))
         repos (usr-orgs "kittens")]
-    (is (= repos ["facebook" "reactjs" "babel" "koral"]))))
+    (is (= repos [{:org "facebook"} {:org "reactjs"} {:org "babel"} {:org "koral"}]))))
 
 (defn org-repos [url options]
   (let [p (promise)]
@@ -91,7 +91,7 @@
   "client gets org's repos"
   (let [usr-rep (gh/org-public-repos (gh/request org-repos))
         repos (usr-rep "redbadger")]
-    (is (= repos ["redbadger/CloudFolderBackup" "redbadger/ScriptDependencyResolver"]))))
+    (is (= repos [{:repo "redbadger/CloudFolderBackup"} {:repo "redbadger/ScriptDependencyResolver"}]))))
 
 (defn user-issues [url options]
   (let [p (promise)]
@@ -105,8 +105,10 @@
   "client can get users's issues and pull reuqests"
   (let [usr-issues (gh/user-issues (gh/request user-issues))
         issues (usr-issues ["charypar"])
-        expected [{:repo "redbadger/oss-contribution-tracker",
+        expected [{:repo "redbadger/oss-contribution-tracker"
+                   :user "charypar"
                    :issue {:type :pull_request, :url "https://github.com/redbadger/oss-contribution-tracker/pull/1"}}
-                  {:repo "dowjones/react-json-schema-proptypes",
+                  {:repo "dowjones/react-json-schema-proptypes"
+                   :user "charypar"
                    :issue {:type :issue, :url "https://github.com/dowjones/react-json-schema-proptypes/issues/2"}}]]
     (is (= issues expected))))
