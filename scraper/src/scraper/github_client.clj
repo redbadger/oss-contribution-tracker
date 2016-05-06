@@ -51,37 +51,37 @@
 (defn org-members
   "fetches members of an organisation"
   [gh]
-  (fn [org]
+  (fn [{org :org :as record}]
     (let [res (gh {:path (str "/orgs/" org "/members") :query {:per_page 100}})]
       (into [] (map (fn [it] {:user (:login it)}) res)))))
 
 (defn user-orgs
   "fetches organisation a user publicly belongs to"
   [gh]
-  (fn [user]
+  (fn [{user :user :as record}]
     (let [res (gh {:path (str "/users/" user "/orgs") :query {:per_page 100}})]
-      (into [] (map (fn [it] {:org (:login it)}) res)))))
+      (into [] (map (fn [it] {:org (:login it) :user user}) res)))))
 
 (defn parse-repos
-  [repos]
+  [user repos]
   (let [tx (comp
              (filter #(not (or (:private %) (:fork %))))
-             (map (fn [repo] {:repo (:full_name repo)})))]
+             (map (fn [repo] {:repo (:full_name repo) :user user})))]
     (into [] (sequence tx repos))))
 
 (defn user-public-repos
   "fetches user's public repos"
   [gh]
-  (fn [user]
+  (fn [{user :user :as record}]
     (let [res (gh {:path (str "/users/" user "/repos") :query {:per_page 100}})]
-      (parse-repos res))))
+      (parse-repos user res))))
 
 (defn org-public-repos
   "fetches public repos of an organisation"
   [gh]
-  (fn [org]
+  (fn [{org :org user :user :as record}]
     (let [res (gh {:path (str "/orgs/" org "/repos") :query {:per_page 100 :type "public"}})]
-      (parse-repos res))))
+      (parse-repos user res))))
 
 (defn repo-from-url
   [url]
@@ -105,8 +105,8 @@
 (defn user-issues
   "fetches user's public issues and PRs across github"
   [gh]
-  (fn [users]
-    (let [query (clojure.string/join " " (map #(str "author:" %) users))
+  (fn [{user :user :as record}]
+    (let [query (str "author:" user)
           res (gh {:path (str "/search/issues") :query {:q query :per_page 100}})
           ]
       (into [] (map parse-issue (:items res))))))

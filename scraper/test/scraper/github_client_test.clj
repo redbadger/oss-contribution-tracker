@@ -50,7 +50,7 @@
 (deftest gets-org-members
   "client gets org members"
   (let [org-mem (gh/org-members (gh/request org-get))
-        members (org-mem "redbadger")]
+        members (org-mem {:org "redbadger"})]
     (is (= members [{:user "ajcumine"} {:user "AmyBadger"}]))))
 
 (defn user-repos [url options]
@@ -63,8 +63,8 @@
 (deftest gets-users-repos
   "client gets user's repos"
   (let [usr-rep (gh/user-public-repos (gh/request user-repos))
-        repos (usr-rep "charypar")]
-    (is (= repos [{:repo "charypar/comp"} {:repo "charypar/cyclical"}]))))
+        repos (usr-rep {:user "charypar"})]
+    (is (= repos [{:repo "charypar/comp" :user "charypar"} {:repo "charypar/cyclical" :user "charypar"}]))))
 
 (defn user-orgs [url options]
   (let [p (promise)]
@@ -76,8 +76,11 @@
 (deftest get-users-orgs
   "client gets user's organisations"
   (let [usr-orgs (gh/user-orgs (gh/request user-orgs))
-        repos (usr-orgs "kittens")]
-    (is (= repos [{:org "facebook"} {:org "reactjs"} {:org "babel"} {:org "koral"}]))))
+        repos (usr-orgs {:user "kittens"})]
+    (is (= repos [{:org "facebook" :user "kittens"}
+                  {:org "reactjs" :user "kittens"}
+                  {:org "babel" :user "kittens"}
+                  {:org "koral" :user "kittens"}]))))
 
 (defn org-repos [url options]
   (let [p (promise)]
@@ -89,9 +92,10 @@
 
 (deftest gets-orgs-repos
   "client gets org's repos"
-  (let [usr-rep (gh/org-public-repos (gh/request org-repos))
-        repos (usr-rep "redbadger")]
-    (is (= repos [{:repo "redbadger/CloudFolderBackup"} {:repo "redbadger/ScriptDependencyResolver"}]))))
+  (let [org-rep (gh/org-public-repos (gh/request org-repos))
+        repos (org-rep {:org "redbadger" :user "charypar"})]
+    (is (= repos [{:repo "redbadger/CloudFolderBackup" :user "charypar"}
+                  {:repo "redbadger/ScriptDependencyResolver" :user "charypar"}]))))
 
 (defn user-issues [url options]
   (let [p (promise)]
@@ -104,7 +108,7 @@
 (deftest gets-users-issues
   "client can get users's issues and pull reuqests"
   (let [usr-issues (gh/user-issues (gh/request user-issues))
-        issues (usr-issues ["charypar"])
+        issues (usr-issues {:user "charypar"})
         expected [{:repo "redbadger/oss-contribution-tracker"
                    :user "charypar"
                    :issue {:type :pull_request, :url "https://github.com/redbadger/oss-contribution-tracker/pull/1"}}
@@ -112,3 +116,8 @@
                    :user "charypar"
                    :issue {:type :issue, :url "https://github.com/dowjones/react-json-schema-proptypes/issues/2"}}]]
     (is (= issues expected))))
+
+; (deftest gets-repos-master-commits-by-user
+;   "client can get commits in the default branch by a user"
+;   (let [repo-commits (gh/repo-commits (gh/request repo-commits))
+;         commits (repo-commits "charypar")]))
