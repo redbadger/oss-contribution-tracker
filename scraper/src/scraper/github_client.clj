@@ -75,3 +75,30 @@
   (fn [org]
     (let [res (gh {:path (str "/orgs/" org "/repos") :query {:per_page 100 :type "public"}})]
       (into [] (map :full_name (filter #(not (:fork %)) res))))))
+
+(defn repo-from-url
+  [url]
+  (clojure.string/join "/"
+    (-> url
+      (split #"/")
+      (reverse)
+      (vec)
+      (subvec 0 2)
+      (reverse))))
+
+(defn parse-issue
+  [issue]
+  (let [repo (repo-from-url (:repository_url issue))
+        pr? (:pull_request issue)
+        type (if pr? :pull_request :issue)
+        url (if pr? (:html_url (:pull_request issue)) (:html_url issue))]
+    {:repo repo :issue { :type type :url url}}))
+
+(defn user-issues
+  "fetches user's public issues and PRs across github"
+  [gh]
+  (fn [users]
+    (let [query (clojure.string/join " " (map #(str "author:" %) users))
+          res (gh {:path (str "/search/issues") :query {:q query :per_page 100}})
+          ]
+      (into [] (map parse-issue (:items res))))))

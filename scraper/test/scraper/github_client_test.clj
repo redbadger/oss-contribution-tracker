@@ -92,3 +92,21 @@
   (let [usr-rep (gh/org-public-repos (gh/request org-repos))
         repos (usr-rep "redbadger")]
     (is (= repos ["redbadger/CloudFolderBackup" "redbadger/ScriptDependencyResolver"]))))
+
+(defn user-issues [url options]
+  (let [p (promise)]
+    (is (= url "https://api.github.com/search/issues"))
+    (is (= (:query-params options) {:q "author:charypar" :per_page 100}))
+    (deliver p {:status 200
+                :headers {}
+                :body (slurp "test/scraper/fixtures/user-issues.json")})))
+
+(deftest gets-users-issues
+  "client can get users's issues and pull reuqests"
+  (let [usr-issues (gh/user-issues (gh/request user-issues))
+        issues (usr-issues ["charypar"])
+        expected [{:repo "redbadger/oss-contribution-tracker",
+                   :issue {:type :pull_request, :url "https://github.com/redbadger/oss-contribution-tracker/pull/1"}}
+                  {:repo "dowjones/react-json-schema-proptypes",
+                   :issue {:type :issue, :url "https://github.com/dowjones/react-json-schema-proptypes/issues/2"}}]]
+    (is (= issues expected))))
