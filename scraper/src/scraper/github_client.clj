@@ -30,3 +30,10 @@
   (fn [user]
     (let [res (gh {:path (str "/users/" user "/repos") :query {:per_page 500}})]
       (into [] (map :name (filter #(not (or (:private %) (:fork %))) res))))))
+
+(defn user-orgs
+  "fetches members of an organisation"
+  [gh]
+  (fn [user]
+    (let [res (gh {:path (str "/users/" user "/orgs") :query {:per_page 500}})]
+      (into [] (map :login res)))))

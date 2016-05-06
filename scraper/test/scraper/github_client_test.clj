@@ -42,3 +42,17 @@
   (let [usr-rep (gh/user-public-repos (gh/request user-repos))
         repos (usr-rep "charypar")]
     (is (= repos ["comp" "cyclical"]))))
+
+(defn user-orgs [url options]
+  (let [p (promise)]
+    (is (= url "https://api.github.com/users/kittens/orgs"))
+    (is (= (:query-params options) {:per_page 500}))
+    (deliver p {:status 200
+                :headers {}
+                :body (slurp "test/scraper/fixtures/user-orgs.json")})))
+
+(deftest get-users-orgs
+  "client gets user's organisations"
+  (let [usr-orgs (gh/user-orgs (gh/request user-orgs))
+        repos (usr-orgs "kittens")]
+    (is (= repos ["facebook" "reactjs" "babel" "koral"]))))
