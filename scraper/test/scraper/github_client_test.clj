@@ -111,10 +111,16 @@
         issues (usr-issues {:user "charypar"})
         expected [{:repo "redbadger/oss-contribution-tracker"
                    :user "charypar"
-                   :issue {:type :pull-request :url "https://github.com/redbadger/oss-contribution-tracker/pull/1"}}
+                   :issue {:type :pull-request
+                           :title "[WIP] Github API client layer"
+                           :date-created "2016-05-05T11:19:10Z"
+                           :url "https://github.com/redbadger/oss-contribution-tracker/pull/1"}}
                   {:repo "dowjones/react-json-schema-proptypes"
                    :user "charypar"
-                   :issue {:type :issue :url "https://github.com/dowjones/react-json-schema-proptypes/issues/2"}}]]
+                   :issue {:type :issue
+                           :title "Add travis integration and readme badges"
+                           :date-created "2016-04-15T18:04:12Z"
+                           :url "https://github.com/dowjones/react-json-schema-proptypes/issues/2"}}]]
     (is (= issues expected))))
 
 (defn repo-commits [url options]
@@ -130,6 +136,7 @@
   (let [repo-commits (gh/repo-commits (gh/request repo-commits))
         commits (repo-commits {:user "charypar" :repo "redbadger/oss-contribution-tracker"})
         expected [{:user "charypar"
-                   :commit {:message "Initial commit with a scraper library skeleton"
+                   :commit {:title "Initial commit with a scraper library skeleton"
+                            :date-created "2016-05-03T09:27:22Z"
                             :url "https://github.com/redbadger/oss-contribution-tracker/commit/ce820f8f2b4a2829277fea52df73da055ba13ea1" }}]]
     (is (= commits expected))))

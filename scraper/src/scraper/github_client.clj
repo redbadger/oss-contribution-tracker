@@ -97,10 +97,11 @@
   [issue]
   (let [repo (repo-from-url (:repository_url issue))
         user (:login (:user issue))
+        {date-created :created_at title :title} issue
         pr? (:pull_request issue)
         type (if pr? :pull-request :issue)
         url (if pr? (:html_url (:pull_request issue)) (:html_url issue))]
-    {:repo repo :user user :issue {:type type :url url}}))
+    {:repo repo :user user :issue {:type type :title title :date-created date-created :url url}}))
 
 (defn user-issues
   "fetches user's public issues and PRs across github"
@@ -114,7 +115,9 @@
 (defn parse-commit
   [user commit]
   {:user user
-   :commit {:message (:message (:commit commit)) :url (:html_url commit)}})
+   :commit {:title (:message (:commit commit))
+            :date-created (:date (:author (:commit commit)))
+            :url (:html_url commit)}})
 
 (defn repo-commits
   "fetches user's public issues and PRs across github"
