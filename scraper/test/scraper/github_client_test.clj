@@ -17,24 +17,28 @@
 
 (defn org-get [url options]
   (let [p (promise)]
+    (is (= url "https://api.github.com/orgs/redbadger/members"))
+    (is (= (:query-params options) {:per_page 500}))
     (deliver p {:status 200
                 :headers {}
                 :body (slurp "test/scraper/fixtures/org-members.json")})))
 
 (deftest gets-org-members
   "client gets org members"
-  (let [org-mem (gh/org-members org-get)
+  (let [org-mem (gh/org-members (gh/request org-get))
         members (org-mem "redbadger")]
     (is (= members ["ajcumine" "AmyBadger"]))))
 
 (defn user-repos [url options]
   (let [p (promise)]
+    (is (= url "https://api.github.com/users/charypar/repos"))
+    (is (= (:query-params options) {:per_page 500}))
     (deliver p {:status 200
                 :headers {}
                 :body (slurp "test/scraper/fixtures/user-repos.json")})))
 
 (deftest gets-users-repos
   "client gets user's repos"
-  (let [usr-rep (gh/user-public-repos user-repos)
+  (let [usr-rep (gh/user-public-repos (gh/request user-repos))
         repos (usr-rep "charypar")]
     (is (= repos ["comp" "cyclical"]))))
