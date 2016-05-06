@@ -2,6 +2,11 @@
   (:use clojure.test)
   (:require [scraper.github-client :as gh]))
 
+(deftest parses-link-header
+  (let [{:keys [url query]} (gh/next-page "<https://foo.com/bar?page=3&per_page=10&hello=hi>; rel=\"next\", ")]
+    (is (= url "https://foo.com/bar")
+    (is (= query {:page "3" :per_page "10" :hello "hi"})))))
+
 (defn basic-get [url options]
   (let [p (promise)]
     (deliver p {:status 200
@@ -15,10 +20,29 @@
         res (client req)]
     (is (= res {:url "https://api.github.com/foo" :auth gh/github-auth}))))
 
+(defn paged-get [url options]
+  (let [page (:page (:query-params options))]
+    (if (not (= page "2"))
+      (let [p (promise)]
+        (is (= url "https://api.github.com/foo"))
+        (deliver p {:status 200
+                    :headers {:Link "<https://api.github.com/bar?page=2>; rel=\"next\", <https://api.github.com/bar?page=2>; rel=\"last\""}
+                    :body (str "[{\"url\": \""url"\"}]")}))
+      (let [p (promise)]
+        (deliver p {:status 200
+                    :headers {}
+                    :body (str "[{\"url\": \""url"\"}]")})))))
+
+(deftest follows-pagination
+  "client follows pagination and augments the collection"
+  (let [req {:method :get :path "/foo"}
+        client (gh/request paged-get)
+        res (client req)]
+    (is (= res [{:url "https://api.github.com/foo"} {:url "https://api.github.com/bar"}]))))
+
 (defn org-get [url options]
   (let [p (promise)]
     (is (= url "https://api.github.com/orgs/redbadger/members"))
-    (is (= (:query-params options) {:per_page 500}))
     (deliver p {:status 200
                 :headers {}
                 :body (slurp "test/scraper/fixtures/org-members.json")})))
@@ -32,7 +56,6 @@
 (defn user-repos [url options]
   (let [p (promise)]
     (is (= url "https://api.github.com/users/charypar/repos"))
-    (is (= (:query-params options) {:per_page 500}))
     (deliver p {:status 200
                 :headers {}
                 :body (slurp "test/scraper/fixtures/user-repos.json")})))
@@ -46,7 +69,6 @@
 (defn user-orgs [url options]
   (let [p (promise)]
     (is (= url "https://api.github.com/users/kittens/orgs"))
-    (is (= (:query-params options) {:per_page 500}))
     (deliver p {:status 200
                 :headers {}
                 :body (slurp "test/scraper/fixtures/user-orgs.json")})))

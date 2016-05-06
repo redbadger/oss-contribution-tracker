@@ -1,0 +1,54 @@
+[
+    {
+        "login": "facebook",
+        "id": 69631,
+        "url": "https://api.github.com/orgs/facebook",
+        "repos_url": "https://api.github.com/orgs/facebook/repos",
+        "events_url": "https://api.github.com/orgs/facebook/events",
+        "hooks_url": "https://api.github.com/orgs/facebook/hooks",
+        "issues_url": "https://api.github.com/orgs/facebook/issues",
+        "members_url": "https://api.github.com/orgs/facebook/members{/member}",
+        "public_members_url": "https://api.github.com/orgs/facebook/public_members{/member}",
+        "avatar_url": "https://avatars.githubusercontent.com/u/69631?v=3",
+        "description": "We work hard to contribute our work back to the web, mobile, big data, & infrastructure communities. NB: members must have two-factor auth."
+    },
+    {
+        "login": "reactjs",
+        "id": 6412038,
+        "url": "https://api.github.com/orgs/reactjs",
+        "repos_url": "https://api.github.com/orgs/reactjs/repos",
+        "events_url": "https://api.github.com/orgs/reactjs/events",
+        "hooks_url": "https://api.github.com/orgs/reactjs/hooks",
+        "issues_url": "https://api.github.com/orgs/reactjs/issues",
+        "members_url": "https://api.github.com/orgs/reactjs/members{/member}",
+        "public_members_url": "https://api.github.com/orgs/reactjs/public_members{/member}",
+        "avatar_url": "https://avatars.githubusercontent.com/u/6412038?v=3",
+        "description": "Quality code from the React community https://facebook.github.io/react"
+    },
+    {
+        "login": "babel",
+        "id": 9637642,
+        "url": "https://api.github.com/orgs/babel",
+        "repos_url": "https://api.github.com/orgs/babel/repos",
+        "events_url": "https://api.github.com/orgs/babel/events",
+        "hooks_url": "https://api.github.com/orgs/babel/hooks",
+        "issues_url": "https://api.github.com/orgs/babel/issues",
+        "members_url": "https://api.github.com/orgs/babel/members{/member}",
+        "public_members_url": "https://api.github.com/orgs/babel/public_members{/member}",
+        "avatar_url": "https://avatars.githubusercontent.com/u/9637642?v=3",
+        "description": "Next generation JavaScript, today."
+    },
+    {
+        "login": "koral",
+        "id": 12114809,
+        "url": "https://api.github.com/orgs/koral",
+        "repos_url": "https://api.github.com/orgs/koral/repos",
+        "events_url": "https://api.github.com/orgs/koral/events",
+        "hooks_url": "https://api.github.com/orgs/koral/hooks",
+        "issues_url": "https://api.github.com/orgs/koral/issues",
+        "members_url": "https://api.github.com/orgs/koral/members{/member}",
+        "public_members_url": "https://api.github.com/orgs/koral/public_members{/member}",
+        "avatar_url": "https://avatars.githubusercontent.com/u/12114809?v=3",
+        "description": "Version control for designers."
+    }
+]
