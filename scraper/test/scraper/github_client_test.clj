@@ -64,7 +64,7 @@
   "client gets user's repos"
   (let [usr-rep (gh/user-public-repos (gh/request user-repos))
         repos (usr-rep "charypar")]
-    (is (= repos ["comp" "cyclical"]))))
+    (is (= repos ["charypar/comp" "charypar/cyclical"]))))
 
 (defn user-orgs [url options]
   (let [p (promise)]
@@ -78,3 +78,17 @@
   (let [usr-orgs (gh/user-orgs (gh/request user-orgs))
         repos (usr-orgs "kittens")]
     (is (= repos ["facebook" "reactjs" "babel" "koral"]))))
+
+(defn org-repos [url options]
+  (let [p (promise)]
+    (is (= url "https://api.github.com/orgs/redbadger/repos"))
+    (is (= (:query-params options) {:type "public" :per_page 100}))
+    (deliver p {:status 200
+                :headers {}
+                :body (slurp "test/scraper/fixtures/org-repos.json")})))
+
+(deftest gets-orgs-repos
+  "client gets org's repos"
+  (let [usr-rep (gh/org-public-repos (gh/request org-repos))
+        repos (usr-rep "redbadger")]
+    (is (= repos ["redbadger/CloudFolderBackup" "redbadger/ScriptDependencyResolver"]))))

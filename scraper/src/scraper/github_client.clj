@@ -56,15 +56,22 @@
       (into [] (map :login res)))))
 
 (defn user-public-repos
-  "fetches members of an organisation"
+  "fetches user's public repos"
   [gh]
   (fn [user]
     (let [res (gh {:path (str "/users/" user "/repos") :query {:per_page 100}})]
-      (into [] (map :name (filter #(not (or (:private %) (:fork %))) res))))))
+      (into [] (map :full_name (filter #(not (or (:private %) (:fork %))) res))))))
 
 (defn user-orgs
-  "fetches members of an organisation"
+  "fetches organisation a user publicly belongs to"
   [gh]
   (fn [user]
     (let [res (gh {:path (str "/users/" user "/orgs") :query {:per_page 100}})]
       (into [] (map :login res)))))
+
+(defn org-public-repos
+  "fetches public repos of an organisation"
+  [gh]
+  (fn [org]
+    (let [res (gh {:path (str "/orgs/" org "/repos") :query {:per_page 100 :type "public"}})]
+      (into [] (map :full_name (filter #(not (:fork %)) res))))))
