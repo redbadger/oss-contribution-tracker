@@ -10,7 +10,10 @@
 (enable-console-print!)
 
 (def schema
-  {:contributions/user {:db/cardinality :db.cardinality/many}
+  {:user/name {:db/unique :db.unique/identity}
+   :user/contributions {:db/cardinality :db.cardinality/many}
+   :contribution/id {:db/unique :db.unique/identity}
+   :contribution/user {:db/type :db.type/ref}
    :contribution/languages {:db/cardinality :db.cardinality/many}})
 
 (def conn (d/create-conn schema))
@@ -19,9 +22,20 @@
   [id item]
   (assoc item :db/id (* (+ id 1) -1)))
 
+(defn to-db-user
+  [name]
+  {:user/name name})
+
+(def initial-users
+  (map-indexed add-db-id (map to-db-user fixtures/users)))
+
 (def initial-contributions
   (map-indexed add-db-id
     (into [] (gen/sample fixtures/contribution 50))))
+
+; Set up initial database with users
+(d/transact! conn
+  initial-users)
 
 ; Set up initial database with contributions
 (d/transact! conn
@@ -29,17 +43,19 @@
 
 (defmulti read om/dispatch)
 
-(def contibution-query
-  '[:find [(pull ?e ?selector) ...]
-    :in $ ?selector ?user
-    :where [?e :contribution/id]
-           [?e :contribution/user ?user]])
-
 (defmethod read :contributions/list
-  [{:keys [state query] :as env} key {:keys [user] :as params}]
-  (let [q-args [contibution-query (d/db state) query]
-        query-args (if user (conj q-args user) q-args)]
-    {:value (apply d/q query-args)}))
+  [{:keys [state query] :as env} key params]
+  {:value (d/q '[:find [(pull ?e ?selector) ...]
+                 :in $ ?selector
+                 :where [?e :contribution/id]]
+            (d/db state) query)})
+
+(defmethod read :users/list
+  [{:keys [state query] :as env} key params]
+  {:value (d/q '[:find [(pull ?e ?selector) ...]
+                 :in $ ?selector
+                 :where [?e :user/name]]
+            (d/db state) query)})
 
 (def parser (om/parser {:read read}))
 

@@ -35,23 +35,21 @@
   {:value (count value) :label key })
 
 (defn contribution
-  [{dateCreated :contribution/date-created uuid :contribution/id user :contribution/user}]
+  [{dateCreated :contribution/date-created uuid :contribution/id}]
   (let [id (str uuid)
         date (coerce/to-string dateCreated)]
     (dom/ul #js {:key id}
       (dom/li nil id)
-      (dom/li nil date)
-      (dom/li nil user))))
+      (dom/li nil date))))
 
 (defui Contributions
   static om/IQuery
   (query [this]
-    [{:contributions/list [:contribution/id
-                           :contribution/date-created
-                           :contribution/user]}])
+    {:contributions [:contribution/id
+                     :contribution/date-created]})
   Object
   (render [this]
-    (let [{c :contributions/list label :label} (om/props this)
+    (let [{c :contributions label :label} (om/props this)
           points (sort-by :label (map toValues (seq (group-by days c))))]
       (dom/div #js {:style s-container}
         (dom/div #js {:style s-title-container}
@@ -61,4 +59,4 @@
           (chart {:points points}))))))
 
 
-(def contributions (om/factory Contributions))
+(def contributions (om/factory Contributions {:keyfn :id}))

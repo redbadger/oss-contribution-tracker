@@ -3,11 +3,18 @@
             [clojure.test.check.generators :as gen]
             [goog.string :refer (format)]))
 
+(def users
+  ["User A", "User B", "User C", "User D", "User E"])
+
+(defn to-user
+  [name]
+  [:user/name name])
+
 (def contribution
   "Contribution generator"
   (gen/hash-map
     :contribution/id gen/uuid
-    :contribution/user (gen/elements [ "User A", "User B", "User C", "User D", "User E" ])
+    :contribution/user (gen/fmap to-user (gen/elements users))
     :contribution/repository gen/string-ascii
     :contribution/date-created (gen/fmap time/from-long (gen/choose 1449000000000 1450000000000))
     :contribution/date-public (gen/fmap time/from-long (gen/choose 1449000000000 1450000000000))

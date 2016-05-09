@@ -13,18 +13,28 @@
 (def s-title
   (clj->js styles/f2))
 
+(defn user-to-contributions
+  [index {u :user/name c :contribution/_user}]
+  (contributions {:id index
+                  :contributions c
+                  :label u}))
+
 (defui App
   static om/IQueryParams
   (params [this]
-    {:contributions (om/get-query Contributions)}
-    )
+    (let [{c :contributions} (om/get-query Contributions)]
+      {:contributions-list c
+       :contributions-by-user c}))
   static om/IQuery
   (query [this]
-    '?contributions)
+    '[{:users/list [:user/name {:contribution/_user ?contributions-by-user}]}
+      {:contributions/list ?contributions-list}])
   Object
   (render [this]
-    (let [{c :contributions/list} (om/props this)]
+    (let [{c :contributions/list u :users/list} (om/props this)]
       (dom/div #js {:style s-app}
         (dom/h1 #js {:style s-title} "OSS Contribution Tracker")
-        (contributions {:contributions/list c
-                        :label "Red Badger"})))))
+        (contributions {:id 0
+                        :contributions c
+                        :label "Red Badger"})
+        (dom/div nil (map-indexed user-to-contributions u))))))
