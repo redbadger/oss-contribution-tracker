@@ -17,9 +17,8 @@
 
 (deftest does-request
   "client sends requests and parses responses"
-  (let [req {:method :get :path "/foo" :query {:page 2}}
-        client (gh/request basic-get)
-        res (client req)]
+  (let [client (gh/request basic-get)
+        res (client {:path "/foo" :query {:page 2}})]
     (is (= res {:url "https://api.github.com/foo" :auth gh/github-auth}))))
 
 (def ten-minutes-from-now (+ (* 10 60) (quot (System/currentTimeMillis) 1000)))
@@ -41,11 +40,10 @@
 
 (deftest perform-request
   "client performs a single request returning body and relevant header information"
-  (let [req {:url "https://api.github.com/foo"}
-        res (gh/perform-request paged-get req)]
+  (let [res (gh/perform-request paged-get :core "https://api.github.com/foo")]
     (is (= (:body res) [{:url "https://api.github.com/foo"}]))
     (is (= (:next-page res) {:url "https://api.github.com/bar" :query {:page "2"}}))
-    (is (= (:rate-limit res) {:remaining 6000 :reset ten-minutes-from-now}))))
+    (is (= (:rate-limit res) {:scope :core :remaining 6000 :reset ten-minutes-from-now}))))
 
 (deftest follows-pagination
   "client follows pagination and augments the collection"

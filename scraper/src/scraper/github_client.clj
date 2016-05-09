@@ -21,40 +21,48 @@
           query (apply hash-map (mapcat qs-pair (split qs #"&")))]
       {:url url :query query})))
 
+(defn- rate-limit-scope
+  [url]
+  (let [[_ scope] (re-matches #"https://[^/]+/([^/]+)/.*" url)]
+    (if (= "search" scope)
+      :search
+      :core)))
+
 (defn- rate-limit
-  [headers]
+  [scope headers]
   (if (and (:x-ratelimit-remaining headers) (:x-ratelimit-reset headers))
-    {:remaining (Integer/parseInt (:x-ratelimit-remaining headers))
+    {:scope scope
+     :remaining (Integer/parseInt (:x-ratelimit-remaining headers))
      :reset (Integer/parseInt (:x-ratelimit-reset headers))}
     {}))
 
 (defn perform-request
   "run a single github request"
-  [http-get req]
-  (let [{:keys [url query]} req
-        options {:query-params (or query {}) :basic-auth github-auth}
+  [http-get scope url & [query]]
+  (let [options {:query-params (or query {}) :basic-auth github-auth}
         {:keys [status headers body error]} @(http-get url options)]
-    (println "GET" url query "..." status)
     (if error
-      (println "Request failed" req "exception" error))
-      {:body (json/read-str body :key-fn keyword)
+      (println "Request failed" url "exception" error))
+      {:status status
+       :body (json/read-str body :key-fn keyword)
        :next-page (next-page (:Link headers))
-       :rate-limit (rate-limit headers)}))
+       :rate-limit (rate-limit scope headers)}))
 
 (defn- time-now []
   (System/currentTimeMillis))
 
 (defn- calculate-delay
   "Calculate delay necessary to stay within the rate limit"
-  [now {remaining :remaining reset :reset}]
-  (if (and now remaining reset)
-    (quot (- reset now) remaining)
-    0))
+  [scope now rate-limit]
+  (let [{:keys [remaining reset]} (rate-limit scope)]
+    (if (and now remaining reset)
+      (max 0 (quot (- reset now) remaining))
+      0)))
 
-(defn- rate-limit-in-ms
-  [rate-limit-in-s]
-  (if (:reset rate-limit-in-s)
-    {:remaining (:remaining rate-limit-in-s) :reset (* 1000 (:reset rate-limit-in-s))}
+(defn- update-rate-limit
+  [current response]
+  (if (:reset response)
+    (assoc current (:scope response) {:remaining (:remaining response) :reset (* 1000 (:reset response))})
     {}))
 
 (defn with-rate-limiting
@@ -67,11 +75,14 @@
       (loop [{:keys [args ch]} (<!! input-channel)
              limits {}]
         (if args ; stop when the channel closes
-          (let [delay (calculate-delay (time-now) limits)]
-            (println "Pausing for" delay "ms to fit the rate limit" limits "...")
-            (if delay (<!! (timeout delay)))
+          (let [[_ scope] args
+                delay (calculate-delay scope (time-now) limits)]
+            (if delay
+              (do
+                (println (str "  Pausing for " delay " ms to fit the rate limit in scope " scope". (" limits ")..."))
+                (<!! (timeout delay))))
             (let [{rate-limit-info :rate-limit :as ret-val} (apply fun args)
-                  new-rate-limit-info (rate-limit-in-ms rate-limit-info)]
+                  new-rate-limit-info (update-rate-limit limits rate-limit-info)]
               (>!! ch ret-val)
               (recur (<!! input-channel) new-rate-limit-info))))))
     (fn [& args] ; original function proxy on the current thread
@@ -84,18 +95,23 @@
   [http-get]
   (let [run-req (with-rate-limiting perform-request)]
     (fn [initial-req]
-      (let [{path :path} initial-req
+      (println "> GET" (str github-base-path (:path initial-req)) "...")
+      (let [{path :path query :query} initial-req
             url (str github-base-path path)
-            {:keys [body next-page]} (run-req http-get (assoc initial-req :url url))]
+            scope (rate-limit-scope url)
+            {:keys [body next-page status]} (run-req http-get scope url query)]
+        (println "<" status "\n")
         (if (not next-page)
           body
           (loop [items body
-                 req (merge initial-req next-page)]
-            (let [{:keys [body next-page]} (run-req http-get req)
+                 {:keys [url query]} next-page]
+            (println "> GET" url "...")
+            (let [{:keys [body next-page status]} (run-req http-get scope url query)
                   new-items (into [] (concat items body))]
+              (println "<" status "\n")
               (if (not next-page)
                 new-items
-                (recur new-items (merge req next-page))))))))))
+                (recur new-items next-page)))))))))
 
 (defn org-members
   "fetches members of an organisation"
