@@ -23,12 +23,9 @@
   (map-indexed add-db-id
     (into [] (gen/sample fixtures/contribution 50))))
 
-; Set up initial database
+; Set up initial database with contributions
 (d/transact! conn
   initial-contributions)
-
-(def app-state
-  {:contributions/list (into [] (gen/sample fixtures/contribution 10))})
 
 (defmulti read om/dispatch)
 
@@ -39,7 +36,7 @@
            [?e :contribution/user ?user]])
 
 (defmethod read :contributions/list
-  [{:keys [state query]} key {:keys [user] :as params}]
+  [{:keys [state query] :as env} key {:keys [user] :as params}]
   (let [q-args [contibution-query (d/db state) query]
         query-args (if user (conj q-args user) q-args)]
     {:value (apply d/q query-args)}))

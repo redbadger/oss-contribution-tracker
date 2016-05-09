@@ -44,6 +44,11 @@
       (dom/li nil user))))
 
 (defui Contributions
+  static om/IQuery
+  (query [this]
+    [{:contributions/list [:contribution/id
+                           :contribution/date-created
+                           :contribution/user]}])
   Object
   (render [this]
     (let [{c :contributions/list label :label} (om/props this)

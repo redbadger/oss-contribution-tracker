@@ -14,12 +14,13 @@
   (clj->js styles/f2))
 
 (defui App
+  static om/IQueryParams
+  (params [this]
+    {:contributions (om/get-query Contributions)}
+    )
   static om/IQuery
   (query [this]
-    `[({:contributions/list [:contribution/id
-                             :contribution/date-created
-                             :contribution/user]}
-       {:user "User B"})])
+    '?contributions)
   Object
   (render [this]
     (let [{c :contributions/list} (om/props this)]
