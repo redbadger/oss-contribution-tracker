@@ -1,6 +1,7 @@
 (ns scraper.github-client-test
   (:use clojure.test)
-  (:require [scraper.github-client :as gh]))
+  (:require [scraper.github-client :as gh]
+            [clojure.core.async :refer [>!! <!! thread alts!! timeout chan]]))
 
 (deftest parses-link-header
   (let [{:keys [url query]} (gh/next-page "<https://foo.com/bar?page=3&per_page=10&hello=hi>; rel=\"next\", ")]
@@ -13,13 +14,15 @@
                 :headers {:foo "bar"}
                 :body (str "{\"url\": \"" url "\", \"auth\": " (into [] (map str (:basic-auth options))) "}")})))
 
+
 (deftest does-request
   "client sends requests and parses responses"
   (let [req {:method :get :path "/foo" :query {:page 2}}
         client (gh/request basic-get)
         res (client req)]
-    (println res)
     (is (= res {:url "https://api.github.com/foo" :auth gh/github-auth}))))
+
+(def ten-minutes-from-now (+ (* 10 60) (quot (System/currentTimeMillis) 1000)))
 
 (defn paged-get [url options]
   (let [page (:page (:query-params options))]
@@ -27,19 +30,49 @@
       (let [p (promise)]
         (is (= url "https://api.github.com/foo"))
         (deliver p {:status 200
-                    :headers {:Link "<https://api.github.com/bar?page=2>; rel=\"next\", <https://api.github.com/bar?page=2>; rel=\"last\""}
-                    :body (str "[{\"url\": \""url"\"}]")}))
+                    :headers {:Link "<https://api.github.com/bar?page=2>; rel=\"next\", <https://api.github.com/bar?page=2>; rel=\"last\""
+                              :x-ratelimit-remaining (str (* 10 60 10)) ; 100 ms pause between requests
+                              :x-ratelimit-reset (str ten-minutes-from-now)}
+                    :body (str "[{\"url\": \"" url "\"}]")}))
       (let [p (promise)]
         (deliver p {:status 200
                     :headers {}
-                    :body (str "[{\"url\": \""url"\"}]")})))))
+                    :body (str "[{\"url\": \"" url "\"}]")})))))
+
+(deftest perform-request
+  "client performs a single request returning body and relevant header information"
+  (let [req {:url "https://api.github.com/foo"}
+        res (gh/perform-request paged-get req)]
+    (is (= (:body res) [{:url "https://api.github.com/foo"}]))
+    (is (= (:next-page res) {:url "https://api.github.com/bar" :query {:page "2"}}))
+    (is (= (:rate-limit res) {:remaining 6000 :reset ten-minutes-from-now}))))
 
 (deftest follows-pagination
   "client follows pagination and augments the collection"
-  (let [req {:method :get :path "/foo"}
+  (let [req {:path "/foo"}
         client (gh/request paged-get)
         res (client req)]
     (is (= res [{:url "https://api.github.com/foo"} {:url "https://api.github.com/bar"}]))))
+
+(defn monitored-paged-get
+  [chan]
+  (fn [url options]
+    (thread (>!! chan :paged-get)) ; notify the observer before calling paged-get
+    (paged-get url options)))
+
+(deftest runs-requests-at-the-limit-rate
+  "client runs requests at the maximum allowed rate"
+  (let [req {:path "/foo"}
+        notif-ch (chan)
+        gh (gh/request (monitored-paged-get notif-ch))
+        res-ch (thread (gh req))
+        timeout (timeout 90)] ; kick off the fetch asynchronously
+    (is (= (<!! notif-ch) :paged-get)) ; read the first notification
+    (let [[val ch] (alts!! [notif-ch timeout])] ; timeout should come before the second notification
+      (println "Alts fired with val" val "on channel" ch)
+      (is (= val nil) "Timeout should fire before the next request")
+      (is (= ch timeout) "Timeout should fire before the next request")
+      (<!! res-ch))))
 
 (defn org-get [url options]
   (let [p (promise)]

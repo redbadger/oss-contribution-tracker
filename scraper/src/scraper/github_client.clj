@@ -1,7 +1,8 @@
 (ns scraper.github-client
   (:require [environ.core :refer [env]]
             [clojure.data.json :as json]
-            [clojure.string :refer [split]]))
+            [clojure.string :refer [split]]
+            [clojure.core.async :refer [chan <!! >!! thread timeout]]))
 
 (def github-auth [(env :github-username) (env :github-token)])
 (def github-base-path "https://api.github.com")
@@ -16,9 +17,16 @@
   [link-header]
   (if link-header
     (let [[_ url] (re-matches #"<([^>]+)>; ?rel=\"next\".*" link-header)
-           [url qs] (split url #"\?")
-           query (apply hash-map (mapcat qs-pair (split qs #"&")))]
+          [url qs] (split url #"\?")
+          query (apply hash-map (mapcat qs-pair (split qs #"&")))]
       {:url url :query query})))
+
+(defn rate-limit
+  [headers]
+  (if (and (:x-ratelimit-remaining headers) (:x-ratelimit-reset headers))
+    {:remaining (Integer/parseInt (:x-ratelimit-remaining headers))
+     :reset (Integer/parseInt (:x-ratelimit-reset headers))}
+    {}))
 
 (defn perform-request
   "run a single github request"
@@ -30,20 +38,56 @@
     (if error
       (println "Request failed" req "exception" error))
       {:body (json/read-str body :key-fn keyword)
-       :next-page (next-page (:Link headers))}))
+       :next-page (next-page (:Link headers))
+       :rate-limit (rate-limit headers)}))
+
+(defn time-now []
+  (System/currentTimeMillis))
+
+(defn calculate-delay
+  "Calculate delay necessary to stay within the rate limit"
+  [now {remaining :remaining reset :reset}]
+  (if (and now remaining reset)
+    (quot (- reset now) remaining)
+    0))
+
+(defn with-rate-limiting
+  "Makes a function asynchronous by running it on a thread and using core.async channels to give
+  it inputs and take outputs. Takes the input channel as argument."
+  [fun]
+  (let [input-channel (chan)]
+    (thread ; spin off the worker thread
+      (loop [{:keys [args ch]} (<!! input-channel)
+             limits {}]
+        (if args
+          (do
+            (let [delay (calculate-delay (time-now) limits)]
+              (println "- Waiting" delay "for rate limiting" limits)
+              (if delay
+                (<!! (timeout delay)))
+              (let [{rate-limit-info :rate-limit :as ret-val} (apply fun args)
+                    new-limit (if (and limits (:reset rate-limit-info)) {:remaining (:remaining rate-limit-info) :reset (* 1000 (:reset rate-limit-info))} {})]
+                (>!! ch ret-val)
+                (recur (<!! input-channel) new-limit)))))))
+    (fn [& args]
+      (let [out-ch (chan)] ; for each call create an channel to receive the result
+        (>!! input-channel {:args args :ch out-ch})
+        (<!! out-ch)))))
+
+(def perform-request-with-rate-limit (with-rate-limiting perform-request)) ; blocking
 
 (defn request
-  "run a github request and follow pagination if necessary"
+  "run a github request while respecting the rate limit and follow pagination if necessary"
   [http-get]
   (fn [initial-req]
     (let [{path :path} initial-req
           url (str github-base-path path)
-          {:keys [body next-page]} (perform-request http-get (assoc initial-req :url url))]
+          {:keys [body next-page]} (perform-request-with-rate-limit http-get (assoc initial-req :url url))]
       (if (not next-page)
         body
         (loop [items body
                req (merge initial-req next-page)]
-          (let [{:keys [body next-page]} (perform-request http-get req)
+          (let [{:keys [body next-page]} (perform-request-with-rate-limit http-get req)
                 new-items (into [] (concat items body))]
             (if (not next-page)
               new-items
