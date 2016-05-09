@@ -1,0 +1,2 @@
+{:github-username "name"
+ :github-token "token"} ; needs permission to read org members

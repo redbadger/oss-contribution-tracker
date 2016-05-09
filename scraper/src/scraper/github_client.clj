@@ -1,8 +1,9 @@
 (ns scraper.github-client
-  (:require [clojure.data.json :as json]
+  (:require [environ.core :refer [env]]
+            [clojure.data.json :as json]
             [clojure.string :refer [split]]))
 
-(def github-auth ["charypar" (str "5bfd3ddc858b5ddfc" "51543f66f0a6dca765f44a4")]) ; can only read org members
+(def github-auth [(env :github-username) (env :github-token)])
 (def github-base-path "https://api.github.com")
 
 (defn qs-pair
