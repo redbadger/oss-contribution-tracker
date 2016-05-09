@@ -1,0 +1,66 @@
+[
+    {
+        "sha": "ce820f8f2b4a2829277fea52df73da055ba13ea1",
+        "commit": {
+            "author": {
+                "name": "Viktor Charypar",
+                "email": "charypar@gmail.com",
+                "date": "2016-05-03T09:27:22Z"
+            },
+            "committer": {
+                "name": "Viktor Charypar",
+                "email": "charypar@gmail.com",
+                "date": "2016-05-03T09:27:22Z"
+            },
+            "message": "Initial commit with a scraper library skeleton",
+            "tree": {
+                "sha": "bfc998cfc93179867d50e1d238b5d72f68f53459",
+                "url": "https://api.github.com/repos/redbadger/oss-contribution-tracker/git/trees/bfc998cfc93179867d50e1d238b5d72f68f53459"
+            },
+            "url": "https://api.github.com/repos/redbadger/oss-contribution-tracker/git/commits/ce820f8f2b4a2829277fea52df73da055ba13ea1",
+            "comment_count": 0
+        },
+        "url": "https://api.github.com/repos/redbadger/oss-contribution-tracker/commits/ce820f8f2b4a2829277fea52df73da055ba13ea1",
+        "html_url": "https://github.com/redbadger/oss-contribution-tracker/commit/ce820f8f2b4a2829277fea52df73da055ba13ea1",
+        "comments_url": "https://api.github.com/repos/redbadger/oss-contribution-tracker/commits/ce820f8f2b4a2829277fea52df73da055ba13ea1/comments",
+        "author": {
+            "login": "charypar",
+            "id": 1517854,
+            "avatar_url": "https://avatars.githubusercontent.com/u/1517854?v=3",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/charypar",
+            "html_url": "https://github.com/charypar",
+            "followers_url": "https://api.github.com/users/charypar/followers",
+            "following_url": "https://api.github.com/users/charypar/following{/other_user}",
+            "gists_url": "https://api.github.com/users/charypar/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/charypar/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/charypar/subscriptions",
+            "organizations_url": "https://api.github.com/users/charypar/orgs",
+            "repos_url": "https://api.github.com/users/charypar/repos",
+            "events_url": "https://api.github.com/users/charypar/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/charypar/received_events",
+            "type": "User",
+            "site_admin": false
+        },
+        "committer": {
+            "login": "charypar",
+            "id": 1517854,
+            "avatar_url": "https://avatars.githubusercontent.com/u/1517854?v=3",
+            "gravatar_id": "",
+            "url": "https://api.github.com/users/charypar",
+            "html_url": "https://github.com/charypar",
+            "followers_url": "https://api.github.com/users/charypar/followers",
+            "following_url": "https://api.github.com/users/charypar/following{/other_user}",
+            "gists_url": "https://api.github.com/users/charypar/gists{/gist_id}",
+            "starred_url": "https://api.github.com/users/charypar/starred{/owner}{/repo}",
+            "subscriptions_url": "https://api.github.com/users/charypar/subscriptions",
+            "organizations_url": "https://api.github.com/users/charypar/orgs",
+            "repos_url": "https://api.github.com/users/charypar/repos",
+            "events_url": "https://api.github.com/users/charypar/events{/privacy}",
+            "received_events_url": "https://api.github.com/users/charypar/received_events",
+            "type": "User",
+            "site_admin": false
+        },
+        "parents": []
+    }
+]
