@@ -11,13 +11,14 @@
   (let [p (promise)]
     (deliver p {:status 200
                 :headers {:foo "bar"}
-                :body (str "{\"url\": \"" url "\", \"auth\": " (str (:basic-auth options)) "}")})))
+                :body (str "{\"url\": \"" url "\", \"auth\": " (into [] (map str (:basic-auth options))) "}")})))
 
 (deftest does-request
   "client sends requests and parses responses"
   (let [req {:method :get :path "/foo" :query {:page 2}}
         client (gh/request basic-get)
         res (client req)]
+    (println res)
     (is (= res {:url "https://api.github.com/foo" :auth gh/github-auth}))))
 
 (defn paged-get [url options]
