@@ -1,5 +1,6 @@
 (ns web.core
-  (:require [clojure.test.check.generators :as gen]
+  (:require [cljs-time.coerce :as coerce]
+            [clojure.test.check.generators :as gen]
             [datascript.core :as d]
             [goog.dom :as gdom]
             [om.dom :as dom]
@@ -14,6 +15,8 @@
    :user/contributions {:db/cardinality :db.cardinality/many}
    :contribution/id {:db/unique :db.unique/identity}
    :contribution/user {:db/type :db.type/ref}
+   :contribution/date-created {:db/type :db.type/instant}
+   :contribution/date-published {:db/type :db.type/instant}
    :contribution/languages {:db/cardinality :db.cardinality/many}})
 
 (def conn (d/create-conn schema))
@@ -25,8 +28,8 @@
 ; Set up initial database with app data
 (d/transact! conn
   [{:db/id -1
-    :app/date-from "2016-01-01"
-    :app/date-to "2016-03-01"}])
+    :app/date-from (coerce/to-long "2015-09-01")
+    :app/date-to (coerce/to-long "2016-01-01")}])
 
 (defn to-db-user
   [name]
@@ -60,7 +63,12 @@
   [{:keys [state query] :as env} key params]
   {:value (d/q '[:find [(pull ?e ?selector) ...]
                  :in $ ?selector
-                 :where [?e :contribution/id]]
+                 :where [?e :contribution/id]
+                        [?e :contribution/date-created ?date]
+                        [?a :app/date-from ?from]
+                        [?a :app/date-to ?to]
+                        [(> ?date ?from)]
+                        [(< ?date ?to)]]
             (d/db state) query)})
 
 (defmethod read :users

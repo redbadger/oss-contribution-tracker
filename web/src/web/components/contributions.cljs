@@ -28,19 +28,11 @@
 
 (defn days
   [{date :contribution/date-created id :contribution/id}]
-  (int (Math/floor (/ (coerce/to-long date) day))))
+  (int (Math/floor (/ date day))))
 
 (defn toValues
   [[key value]]
   {:value (count value) :label key })
-
-(defn contribution
-  [{dateCreated :contribution/date-created uuid :contribution/id}]
-  (let [id (str uuid)
-        date (coerce/to-string dateCreated)]
-    (dom/ul #js {:key id}
-      (dom/li nil id)
-      (dom/li nil date))))
 
 (defui Contributions
   static om/IQuery
@@ -54,7 +46,6 @@
       (dom/div #js {:style s-container}
         (dom/div #js {:style s-title-container}
           (dom/h2 #js {:style s-title} label))
-        ; (dom/div nil (map contribution c))
         (dom/div #js {:style s-chart}
           (chart {:points points}))))))
 

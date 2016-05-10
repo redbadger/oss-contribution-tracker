@@ -1,5 +1,7 @@
 (ns web.components.app
-  (:require [om.dom :as dom]
+  (:require [cljs-time.coerce :as coerce]
+            [cljs-time.format :as format]
+            [om.dom :as dom]
             [om.next :as om :refer-macros [defui]]
             [web.components.contributions :refer (Contributions contributions)]
             [web.styles :as styles]))
@@ -19,11 +21,21 @@
                   :contributions c
                   :label u}))
 
+(defn to-date
+  [ms]
+  (format/unparse
+    (format/formatters :date)
+    (coerce/from-long ms)))
+
+(defn from-date
+  [date]
+  (coerce/to-long date))
+
 (defn handle-date-change
   [e component key]
   (let [{app :app} (om/props component)
         value (.. e -target -value)
-        updated-app (assoc app key value)]
+        updated-app (assoc app key (from-date value))]
     (om/transact! component
       `[(app/update ~updated-app)])))
 
@@ -48,13 +60,12 @@
         (dom/div nil
           (dom/span nil "From ")
           (dom/input #js {:type "date"
-                          :value from
+                          :value (to-date from)
                           :onChange #(handle-date-change % this :app/date-from)})
           (dom/span nil " To ")
           (dom/input #js {:type "date"
-                          :value to
-                          :onChange #(handle-date-change % this :app/date-to)})
-        )
+                          :value (to-date to)
+                          :onChange #(handle-date-change % this :app/date-to)}))
         (contributions {:id 0
                         :contributions c
                         :label "Red Badger"})
