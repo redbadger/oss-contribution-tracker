@@ -22,6 +22,12 @@
   [id item]
   (assoc item :db/id (* (+ id 1) -1)))
 
+; Set up initial database with app data
+(d/transact! conn
+  [{:db/id -1
+    :app/date-from "2016-01-01"
+    :app/date-to "2016-03-01"}])
+
 (defn to-db-user
   [name]
   {:user/name name})
@@ -29,13 +35,13 @@
 (def initial-users
   (map-indexed add-db-id (map to-db-user fixtures/users)))
 
-(def initial-contributions
-  (map-indexed add-db-id
-    (into [] (gen/sample fixtures/contribution 50))))
-
 ; Set up initial database with users
 (d/transact! conn
   initial-users)
+
+(def initial-contributions
+  (map-indexed add-db-id
+    (into [] (gen/sample fixtures/contribution 50))))
 
 ; Set up initial database with contributions
 (d/transact! conn
@@ -43,21 +49,35 @@
 
 (defmulti read om/dispatch)
 
-(defmethod read :contributions/list
+(defmethod read :app
+  [{:keys [state query] :as env} key params]
+  {:value (d/q '[:find (pull ?e ?selector) .
+                 :in $ ?selector
+                 :where [?e :app/date-from]]
+            (d/db state) query)})
+
+(defmethod read :contributions
   [{:keys [state query] :as env} key params]
   {:value (d/q '[:find [(pull ?e ?selector) ...]
                  :in $ ?selector
                  :where [?e :contribution/id]]
             (d/db state) query)})
 
-(defmethod read :users/list
+(defmethod read :users
   [{:keys [state query] :as env} key params]
   {:value (d/q '[:find [(pull ?e ?selector) ...]
                  :in $ ?selector
                  :where [?e :user/name]]
             (d/db state) query)})
 
-(def parser (om/parser {:read read}))
+(defmulti mutate om/dispatch)
+
+(defmethod mutate 'app/update
+  [{:keys [state]} _ app]
+  {:value {:keys [:app]}
+   :action (fn [] (d/transact! state [app]))})
+
+(def parser (om/parser {:read read :mutate mutate}))
 
 (def reconciler
   (om/reconciler

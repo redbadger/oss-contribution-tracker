@@ -13,11 +13,19 @@
 (def s-title
   (clj->js styles/f2))
 
-(defn user-to-contributions
+(defn user-contributions
   [index {u :user/name c :contribution/_user}]
   (contributions {:id index
                   :contributions c
                   :label u}))
+
+(defn handle-date-change
+  [e component key]
+  (let [{app :app} (om/props component)
+        value (.. e -target -value)
+        updated-app (assoc app key value)]
+    (om/transact! component
+      `[(app/update ~updated-app)])))
 
 (defui App
   static om/IQueryParams
@@ -27,14 +35,27 @@
        :contributions-by-user c}))
   static om/IQuery
   (query [this]
-    '[{:users/list [:user/name {:contribution/_user ?contributions-by-user}]}
-      {:contributions/list ?contributions-list}])
+    '[{:app [:db/id :app/date-from :app/date-to]}
+      {:users [:user/name {:contribution/_user ?contributions-by-user}]}
+      {:contributions ?contributions-list}])
   Object
   (render [this]
-    (let [{c :contributions/list u :users/list} (om/props this)]
+    (let [{c :contributions
+           u :users
+           {from :app/date-from to :app/date-to} :app} (om/props this)]
       (dom/div #js {:style s-app}
         (dom/h1 #js {:style s-title} "OSS Contribution Tracker")
+        (dom/div nil
+          (dom/span nil "From ")
+          (dom/input #js {:type "date"
+                          :value from
+                          :onChange #(handle-date-change % this :app/date-from)})
+          (dom/span nil " To ")
+          (dom/input #js {:type "date"
+                          :value to
+                          :onChange #(handle-date-change % this :app/date-to)})
+        )
         (contributions {:id 0
                         :contributions c
                         :label "Red Badger"})
-        (dom/div nil (map-indexed user-to-contributions u))))))
+        (dom/div nil (map-indexed user-contributions u))))))
