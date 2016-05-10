@@ -11,7 +11,7 @@
 (def height 160)
 
 (defn toSVGPoints
-  [width height total x {y :value}]
+  [width height total x [_ y]]
   (let [itemGutterX (/ width total)
         offsetX (/ itemGutterX 2)
         itemGutterY (/ height 5)

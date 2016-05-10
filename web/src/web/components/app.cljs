@@ -16,10 +16,12 @@
   (clj->js styles/f2))
 
 (defn user-contributions
-  [index {u :user/name c :contribution/_user}]
+  [from to index {u :user/name c :contribution/_user}]
   (contributions {:id index
                   :contributions c
-                  :label u}))
+                  :label u
+                  :from from
+                  :to to}))
 
 (defn to-date
   [ms]
@@ -68,5 +70,7 @@
                           :onChange #(handle-date-change % this :app/date-to)}))
         (contributions {:id 0
                         :contributions c
-                        :label "Red Badger"})
-        (dom/div nil (map-indexed user-contributions u))))))
+                        :label "Red Badger"
+                        :from from
+                        :to to})
+        (dom/div nil (map-indexed (partial user-contributions from to) u))))))

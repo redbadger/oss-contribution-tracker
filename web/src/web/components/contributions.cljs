@@ -22,17 +22,26 @@
 (def s-chart
   (clj->js {:width "480px"}))
 
-
 (def day
   (* 24 (* 60 (* 60 1000))))
 
-(defn days
-  [{date :contribution/date-created id :contribution/id}]
-  (int (Math/floor (/ date day))))
+(defn by-day
+  [{date :contribution/date-created}]
+  (quot date day))
 
-(defn toValues
-  [[key value]]
-  {:value (count value) :label key })
+(defn counter
+  [[day contributions]]
+  [day (count contributions)])
+
+(defn fill
+  [acc value]
+  (if (empty? acc)
+    (conj acc value)
+    (let [lday (+ 1 (first (last acc)))
+          day (first value)]
+      (if (= day lday)
+        (conj acc value)
+        (fill (conj acc [lday 0]) value)))))
 
 (defui Contributions
   static om/IQuery
@@ -41,13 +50,18 @@
                      :contribution/date-created]})
   Object
   (render [this]
-    (let [{c :contributions label :label} (om/props this)
-          points (sort-by :label (map toValues (seq (group-by days c))))]
+    (let [{c :contributions
+           label :label
+           from :from
+           to :to} (om/props this)
+          data (sort-by first (group-by by-day c))
+          counts (map counter data)
+          filled (reduce fill [] counts)]
       (dom/div #js {:style s-container}
         (dom/div #js {:style s-title-container}
           (dom/h2 #js {:style s-title} label))
         (dom/div #js {:style s-chart}
-          (chart {:points points}))))))
+          (chart {:points filled}))))))
 
 
 (def contributions (om/factory Contributions {:keyfn :id}))
