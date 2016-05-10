@@ -170,5 +170,5 @@
         expected [{:user "charypar"
                    :commit {:title "Initial commit with a scraper library skeleton"
                             :date-created "2016-05-03T09:27:22Z"
-                            :url "https://github.com/redbadger/oss-contribution-tracker/commit/ce820f8f2b4a2829277fea52df73da055ba13ea1" }}]]
+                            :url "https://github.com/redbadger/oss-contribution-tracker/commit/ce820f8f2b4a2829277fea52df73da055ba13ea1"}}]]
     (is (= commits expected))))

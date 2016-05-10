@@ -2,7 +2,8 @@
   (:require [environ.core :refer [env]]
             [clojure.data.json :as json]
             [clojure.string :refer [split]]
-            [clojure.core.async :refer [chan <!! >!! thread timeout]]))
+            [clojure.core.async :refer [chan <!! >!! thread timeout]]
+            [clojure.tools.logging :as log]))
 
 (def github-auth [(env :github-username) (env :github-token)])
 (def github-base-path "https://api.github.com")
@@ -42,11 +43,11 @@
   (let [options {:query-params (or query {}) :basic-auth github-auth}
         {:keys [status headers body error]} @(http-get url options)]
     (if error
-      (println "Request failed" url "exception" error))
-      {:status status
-       :body (json/read-str body :key-fn keyword)
-       :next-page (next-page (:Link headers))
-       :rate-limit (rate-limit scope headers)}))
+      (log/info "Request failed" url "exception" error))
+    {:status status
+     :body (json/read-str body :key-fn keyword)
+     :next-page (next-page (:Link headers))
+     :rate-limit (rate-limit scope headers)}))
 
 (defn- time-now []
   (System/currentTimeMillis))
@@ -79,7 +80,7 @@
                 delay (calculate-delay scope (time-now) limits)]
             (if delay
               (do
-                (println (str "  Pausing for " delay " ms to fit the rate limit in scope " scope". (" limits ")..."))
+                (log/info (str "  Pausing for " delay " ms to fit the rate limit in scope " scope". (" limits ")..."))
                 (<!! (timeout delay))))
             (let [{rate-limit-info :rate-limit :as ret-val} (apply fun args)
                   new-rate-limit-info (update-rate-limit limits rate-limit-info)]
@@ -95,20 +96,20 @@
   [http-get]
   (let [run-req (with-rate-limiting perform-request)]
     (fn [initial-req]
-      (println "> GET" (str github-base-path (:path initial-req)) "...")
+      (log/info "> GET" (str github-base-path (:path initial-req)) "...")
       (let [{path :path query :query} initial-req
             url (str github-base-path path)
             scope (rate-limit-scope url)
             {:keys [body next-page status]} (run-req http-get scope url query)]
-        (println "<" status "\n")
+        (log/info "<" status "\n")
         (if (not next-page)
           body
           (loop [items body
                  {:keys [url query]} next-page]
-            (println "> GET" url "...")
+            (log/info "> GET" url "...")
             (let [{:keys [body next-page status]} (run-req http-get scope url query)
                   new-items (into [] (concat items body))]
-              (println "<" status "\n")
+              (log/info "<" status "\n")
               (if (not next-page)
                 new-items
                 (recur new-items next-page)))))))))
@@ -173,8 +174,8 @@
   [gh]
   (fn [{user :user :as record}]
     (let [query (str "author:" user)
-          res (gh {:path (str "/search/issues") :query {:q query :per_page 100}})
-          ]
+          res (gh {:path (str "/search/issues") :query {:q query :per_page 100}})]
+
       (into [] (map parse-issue (:items res))))))
 
 (defn- parse-commit
@@ -189,6 +190,6 @@
   [gh]
   (fn [{user :user repo :repo :as record}]
     (let [query (str "author:" user)
-          res (gh {:path (str "/repos/" repo "/commits") :query {:author user :per_page 100}})
-          ]
+          res (gh {:path (str "/repos/" repo "/commits") :query {:author user :per_page 100}})]
+
       (into [] (map (partial parse-commit user) res)))))

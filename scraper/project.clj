@@ -7,5 +7,6 @@
                  [org.clojure/core.async "0.2.374"]
                  [http-kit "2.1.18"]
                  [org.clojure/data.json "0.2.6"]
-                 [environ "1.0.3"]]
+                 [environ "1.0.3"]
+                 [org.clojure/tools.logging "0.3.1"]]
   :main scraper.core)
