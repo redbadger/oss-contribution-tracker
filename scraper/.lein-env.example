@@ -1,2 +1,4 @@
 {:github-username "name"
- :github-token "token"} ; needs permission to read org members
+ :github-token "token" ; needs permission to read org members
+ :datomic-username "greg.stewart@red-badger.com"
+ :datomic-password "xxx"} ; ask Greg or Viktor
