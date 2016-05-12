@@ -1,9 +1,10 @@
 (ns scraper.storage
-  (:require [clojure.edn :as edn]
+  (:require [environ.core :refer [env]]
+            [clojure.edn :as edn]
             [datomic.api :as d]
             [clojure.instant :refer [read-instant-timestamp]]))
 
-(def db-uri "datomic:dev://localhost:4334/oss-tracker")
+(def db-uri (env :datomic-db-uri))
 (def conn (d/connect db-uri))
 
 (defn make-transactor

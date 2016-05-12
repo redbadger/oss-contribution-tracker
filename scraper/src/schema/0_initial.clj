@@ -1,8 +1,8 @@
 (ns schema.0-initial
-  (:require [datomic.api :as d]))
+  (:require [environ.core :refer [env]]
+            [datomic.api :as d]))
 
-(def db-uri "datomic:dev://localhost:4334/oss-tracker")
-; (def db-uri "datomic:mem://oss-tracker")
+(def db-uri (env :datomic-db-uri))
 
 (d/create-database db-uri)
 (def conn (d/connect db-uri))
