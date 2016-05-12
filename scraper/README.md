@@ -5,7 +5,69 @@ made by a Github organisation members
 
 ## Usage
 
-FIXME
+At the moment, this works as a CLI app, just run it with
+
+`lein run`
+
+## Installation
+
+This is a little tricky because we use Datomic. To set up a local development
+environment, you'll need to get Datomic first. That process is a little involved:
+
+1. Create a file called `credentials.clj` in `~/.lein/` with the following content:
+
+   ```
+   {#"my\.datomic\.com" {:username "greg.stewart@red-badger.com"
+                      :password "[the password here]"}}
+   ```
+
+   You can get the password from Greg Stewart, Viktor Charypar or Joe Paice.
+
+2. Get `gpg` installed
+
+   `$ brew install gnupg`
+
+3. Create a keypair
+
+   `$ gpg --gen-key`
+
+4. Encrypt the `credentials.clj` file with `gpg`
+
+   `$gpg --default-recipient-self -e ~/.lein/credentials.clj > ~/.lein/credentials.clj.gpg`
+
+   Try decrypting with
+
+   `gpg --quiet --batch --decrypt ~/.lein/credentials.clj.gpg`
+
+   you will probably get an error saying `can't query passphrase in batch mode`.
+   To work around that
+
+5. Install and run `gpg-agent`
+
+   `$ brew install gpg-agent`
+
+   then in the same terminal window you will eventually run `lein run` or `lein test`
+   start the agent:
+
+   `$ gpg-agent --daemon`
+
+   and run the decryption again
+
+   `gpg --quiet --decrypt ~/.lein/credentials.clj.gpg`
+
+   This should give you a big password prompt, which will remember the password for
+   a while.
+
+6. Finally run
+
+   `$ lein test`
+
+   To install the dependencies and run tests. You will not need to repeat this process
+   once you installed datomic once.
+
+See [the leiningen authentication guide](https://github.com/technomancy/leiningen/blob/master/doc/DEPLOY.md#authentication)
+and [the PGP guide](https://github.com/technomancy/leiningen/blob/master/doc/GPG.md)
+for extra context.
 
 ## License
 
