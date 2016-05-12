@@ -4,10 +4,6 @@
 
 (def db-uri (env :datomic-db-uri))
 
-(d/create-database db-uri)
-(def conn (d/connect db-uri))
-
-
 (def schema
   [{:db/id #db/id[:db.part/db]
     :db/ident :contribution/title
@@ -87,4 +83,6 @@
   (println "Done."))
 
 (defn -main []
-  (define-schema conn schema))
+  (d/create-database db-uri)
+  (let [conn (d/connect db-uri)]
+    (define-schema conn schema)))
