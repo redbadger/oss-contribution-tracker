@@ -5,7 +5,9 @@
             [clojure.instant :refer [read-instant-timestamp]]))
 
 (def db-uri (env :datomic-db-uri))
-(def conn (d/connect db-uri))
+
+(defn connect []
+  (d/connect db-uri))
 
 (defn make-transactor
   [conn]

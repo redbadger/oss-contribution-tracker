@@ -48,7 +48,7 @@
     (filter identity)))
 
 (defn -main []
-  (let [db-transact (db/make-transactor db/conn)
+  (let [db-transact (db/make-transactor (db/connect))
         contributions (transduce tx-stack conj [{:org "redbadger"}])]
     (db-transact schema/schema)
     (db/insert-contributions db-transact contributions)
