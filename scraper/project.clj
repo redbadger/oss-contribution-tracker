@@ -4,8 +4,8 @@
   :license {:name "MIT License"
             :url "http://www.opensource.org/licenses/mit-license.php"}
   :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
-                                   :username [:gpg :env/my-datomic-username]
-                                   :password [:gpg :env/my-datomic-password]}}
+                                   :username [:gpg :env/my_datomic_username]
+                                   :password [:gpg :env/my_datomic_password]}}
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/core.async "0.2.374"]
                  [com.datomic/datomic-pro "0.9.5359"]
