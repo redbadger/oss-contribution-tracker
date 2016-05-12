@@ -96,17 +96,17 @@
   [http-get]
   (let [run-req (with-rate-limiting perform-request)]
     (fn [initial-req]
-      (log/info "> GET" (str github-base-path (:path initial-req)) "...")
+      (log/info "> GET" (str github-base-path (:path initial-req)) (:query initial-req) "...")
       (let [{path :path query :query} initial-req
             url (str github-base-path path)
             scope (rate-limit-scope url)
             {:keys [body next-page status]} (run-req http-get scope url query)]
-        (log/info "<" status "\n")
+        (log/info "<" status "(next page" next-page ")" "\n")
         (if (not next-page)
           body
           (loop [items body
                  {:keys [url query]} next-page]
-            (log/info "> GET" url "...")
+            (log/info "> GET" url query "...")
             (let [{:keys [body next-page status]} (run-req http-get scope url query)
                   new-items (into [] (concat items body))]
               (log/info "<" status "\n")
@@ -163,11 +163,11 @@
   [issue]
   (let [repo (repo-from-url (:repository_url issue))
         user (:login (:user issue))
-        {date-created :created_at title :title} issue
+        {date :created_at title :title} issue
         pr? (:pull_request issue)
         type (if pr? :pull-request :issue)
         url (if pr? (:html_url (:pull_request issue)) (:html_url issue))]
-    {:repo repo :user user :issue {:type type :title title :date-created date-created :url url}}))
+    {:repo repo :user user :issue {:type type :repo repo :title title :date date :url url}}))
 
 (defn user-issues
   "fetches user's public issues and PRs across github"
@@ -175,14 +175,14 @@
   (fn [{user :user :as record}]
     (let [query (str "author:" user)
           res (gh {:path (str "/search/issues") :query {:q query :per_page 100}})]
-
       (into [] (map parse-issue (:items res))))))
 
 (defn- parse-commit
-  [user commit]
+  [user repo commit]
   {:user user
    :commit {:title (:message (:commit commit))
-            :date-created (:date (:author (:commit commit)))
+            :repo repo
+            :date (:date (:author (:commit commit)))
             :url (:html_url commit)}})
 
 (defn repo-commits
@@ -191,5 +191,6 @@
   (fn [{user :user repo :repo :as record}]
     (let [query (str "author:" user)
           res (gh {:path (str "/repos/" repo "/commits") :query {:author user :per_page 100}})]
-
-      (into [] (map (partial parse-commit user) res)))))
+      (if (map? res)
+        []
+        (into [] (map (partial parse-commit user repo) res))))))
