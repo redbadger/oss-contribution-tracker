@@ -53,7 +53,10 @@ environment, you'll need to get Datomic first. That process is a little involved
 
    `$ gpg-agent --daemon`
 
-   and run the decryption again
+   Copy the output and paste it and run it. It will set the agent info in your
+   environment
+
+   Now run the decryption again
 
    `gpg --quiet --decrypt ~/.lein/credentials.clj.gpg`
 
