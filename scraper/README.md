@@ -14,7 +14,7 @@ At the moment, this works as a CLI app, just run it with
 This is a little tricky because we use Datomic. To set up a local development
 environment, you'll need to get Datomic first. That process is a little involved:
 
-1. Copy `.lein-env.example` to `.lein-env` and fill in the missing values.
+1. Copy `.example` files and fill in the missing values.
 
 1. Create a file called `credentials.clj` in `~/.lein/` with the following content:
 

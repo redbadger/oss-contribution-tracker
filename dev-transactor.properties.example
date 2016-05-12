@@ -9,7 +9,7 @@ port=4334
 ################################################################
 # See http://docs.datomic.com/storage.html
 
-license-key=
+license-key= # can be obtained from Greg Stewart
 
 
 
@@ -101,5 +101,3 @@ object-cache-max=128m
 
 # Pick a unique name to distinguish transactor metrics from different systems.
 # aws-cloudwatch-dimension-value=your-system-name
-
-
