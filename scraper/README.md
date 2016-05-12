@@ -48,7 +48,9 @@ environment, you'll need to get Datomic first. That process is a little involved
 
    `$ brew install gpg-agent`
 
-   then in the same terminal window you will eventually run `lein run` or `lein test`
+   adn enable it in `~/.gnupg/gpg.conf` by uncommenting the line saying `use-agent`.
+
+1. In the same terminal window you will eventually run `lein run` or `lein test`
    start the agent:
 
    `$ gpg-agent --daemon`
