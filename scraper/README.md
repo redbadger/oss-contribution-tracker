@@ -7,7 +7,7 @@ made by a Github organisation members
 
 At the moment, this works as a CLI app, just run it with
 
-`lein run`
+`$ lein run`
 
 ## Installation
 
@@ -35,11 +35,11 @@ environment, you'll need to get Datomic first. That process is a little involved
 
 1. Encrypt the `credentials.clj` file with `gpg`
 
-   `$gpg --default-recipient-self -e ~/.lein/credentials.clj > ~/.lein/credentials.clj.gpg`
+   `$ gpg --default-recipient-self -e ~/.lein/credentials.clj > ~/.lein/credentials.clj.gpg`
 
    Try decrypting with
 
-   `gpg --quiet --batch --decrypt ~/.lein/credentials.clj.gpg`
+   `$ gpg --quiet --batch --decrypt ~/.lein/credentials.clj.gpg`
 
    you will probably get an error saying `can't query passphrase in batch mode`.
    To work around that
@@ -60,10 +60,14 @@ environment, you'll need to get Datomic first. That process is a little involved
 
    Now run the decryption again
 
-   `gpg --quiet --decrypt ~/.lein/credentials.clj.gpg`
+   `$ gpg --quiet --decrypt ~/.lein/credentials.clj.gpg`
 
    This should give you a big password prompt, which will remember the password for
    a while.
+
+1. Remove the unencrypted credentials file
+
+   `$ rm ~/.lein/credentials.clj`
 
 1. Now you can run tests
 
