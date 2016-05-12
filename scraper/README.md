@@ -72,13 +72,20 @@ environment, you'll need to get Datomic first. That process is a little involved
    To install the dependencies and run tests. You will not need to repeat this process
    once you installed datomic once.
 
-1. Finally, download the local datomic transactor from mydatomic (get credentials
-   from Greg Stewart) into a directory called `datomic` and unzip it. Then you
-   can run it by running the `run-datomic.sh` shell script in the root of the repo
+1. To be able to run with persistence, you need to download the local datomic transactor
+   from mydatomic (get credentials from Greg Stewart) into a directory called `datomic`
+   and unzip it. Then you can run it by running the `run-datomic.sh` shell script in the
+   root of the repo
 
    `$ ./run-datomic.sh`
 
+1. Finally, create the database and initialise the schema by running
+
+   `$ lein run -m schema.0-initial`
+
 1. This should let you run `lein run` and start scraping!
+
+
 
 See [the leiningen authentication guide](https://github.com/technomancy/leiningen/blob/master/doc/DEPLOY.md#authentication)
 and [the PGP guide](https://github.com/technomancy/leiningen/blob/master/doc/GPG.md)
