@@ -1,6 +1,10 @@
 (ns scraper.storage-test
   (:use clojure.test)
-  (:require [scraper.storage :as db]))
+  (:require [scraper.storage :as db]
+            [datomic.api :as d]))
+
+(def db-uri (env :datomic-db-uri))
+(d/create-database db-uri)
 
 (deftest tx-data-commit
   "Maps a commit contribution into a datomic insertion"
