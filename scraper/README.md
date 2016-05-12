@@ -14,6 +14,8 @@ At the moment, this works as a CLI app, just run it with
 This is a little tricky because we use Datomic. To set up a local development
 environment, you'll need to get Datomic first. That process is a little involved:
 
+1. Copy `.lein-env.example` to `.lein-env` and fill in the missing values.
+
 1. Create a file called `credentials.clj` in `~/.lein/` with the following content:
 
    ```
@@ -23,15 +25,15 @@ environment, you'll need to get Datomic first. That process is a little involved
 
    You can get the password from Greg Stewart, Viktor Charypar or Joe Paice.
 
-2. Get `gpg` installed
+1. Get `gpg` installed
 
    `$ brew install gnupg`
 
-3. Create a keypair
+1. Create a keypair
 
    `$ gpg --gen-key`
 
-4. Encrypt the `credentials.clj` file with `gpg`
+1. Encrypt the `credentials.clj` file with `gpg`
 
    `$gpg --default-recipient-self -e ~/.lein/credentials.clj > ~/.lein/credentials.clj.gpg`
 
@@ -42,7 +44,7 @@ environment, you'll need to get Datomic first. That process is a little involved
    you will probably get an error saying `can't query passphrase in batch mode`.
    To work around that
 
-5. Install and run `gpg-agent`
+1. Install and run `gpg-agent`
 
    `$ brew install gpg-agent`
 
@@ -58,7 +60,7 @@ environment, you'll need to get Datomic first. That process is a little involved
    This should give you a big password prompt, which will remember the password for
    a while.
 
-6. Finally run
+1. Finally run
 
    `$ lein test`
 
