@@ -67,7 +67,6 @@
         timeout (timeout 90)] ; kick off the fetch asynchronously
     (is (= (<!! notif-ch) :paged-get)) ; read the first notification
     (let [[val ch] (alts!! [notif-ch timeout])] ; timeout should come before the second notification
-      (println "Alts fired with val" val "on channel" ch)
       (is (= val nil) "Timeout should fire before the next request")
       (is (= ch timeout) "Timeout should fire before the next request")
       (<!! res-ch))))
@@ -144,14 +143,16 @@
         expected [{:repo "redbadger/oss-contribution-tracker"
                    :user "charypar"
                    :issue {:type :pull-request
+                           :repo "redbadger/oss-contribution-tracker"
                            :title "[WIP] Github API client layer"
-                           :date-created "2016-05-05T11:19:10Z"
+                           :date "2016-05-05T11:19:10Z"
                            :url "https://github.com/redbadger/oss-contribution-tracker/pull/1"}}
                   {:repo "dowjones/react-json-schema-proptypes"
                    :user "charypar"
                    :issue {:type :issue
+                           :repo "dowjones/react-json-schema-proptypes"
                            :title "Add travis integration and readme badges"
-                           :date-created "2016-04-15T18:04:12Z"
+                           :date "2016-04-15T18:04:12Z"
                            :url "https://github.com/dowjones/react-json-schema-proptypes/issues/2"}}]]
     (is (= issues expected))))
 
@@ -169,6 +170,7 @@
         commits (repo-commits {:user "charypar" :repo "redbadger/oss-contribution-tracker"})
         expected [{:user "charypar"
                    :commit {:title "Initial commit with a scraper library skeleton"
-                            :date-created "2016-05-03T09:27:22Z"
-                            :url "https://github.com/redbadger/oss-contribution-tracker/commit/ce820f8f2b4a2829277fea52df73da055ba13ea1"}}]]
+                            :repo "redbadger/oss-contribution-tracker"
+                            :date "2016-05-03T09:27:22Z"
+                            :url "https://github.com/redbadger/oss-contribution-tracker/commit/ce820f8f2b4a2829277fea52df73da055ba13ea1" }}]]
     (is (= commits expected))))
