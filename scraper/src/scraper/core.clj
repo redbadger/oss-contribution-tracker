@@ -1,6 +1,8 @@
 (ns scraper.core
   (:require [org.httpkit.client :as http]
-            [scraper.github-client :as github]))
+            [scraper.github-client :as github]
+            [schema.0-initial :as schema]
+            [scraper.storage :as db]))
 
 (def gh (github/request http/get))
 
@@ -27,21 +29,27 @@
 
 (defn process-contribution
   [{:keys [user issue commit]}]
-  (if commit
-    (merge {:user user :type :commit } commit)
-    (merge {:user user :type :issue } issue)))
+  (cond
+    commit (merge {:user user :type :commit } commit)
+    issue (merge {:user user :type :issue } issue)
+    :else nil))
 
 (def tx-stack
   (comp
     (mapcat (github/org-members gh))
     (filter identity)
-    (take 2)
+    (take 3)
     (mapcat process-user)
     (mapcat (pass-through :org (github/org-public-repos gh)))
     (mapcat (pass-through :issue split-issue))
+    (distinct) ; dedupe repo requests
     (mapcat (pass-through :repo (github/repo-commits gh)))
-    (map process-contribution)))
+    (map process-contribution)
+    (filter identity)))
 
 (defn -main []
-  (doseq [contribs (sequence tx-stack [{:org "redbadger"}])]
-    (clojure.pprint/pprint contribs)))
+  (let [db-transact (db/make-transactor db/conn)
+        contributions (transduce tx-stack conj [{:org "redbadger"}])]
+    (db-transact schema/schema)
+    (db/insert-contributions db-transact contributions)
+    (println "Done")))
