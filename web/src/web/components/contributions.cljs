@@ -25,9 +25,15 @@
 (def day
   (* 24 (* 60 (* 60 1000))))
 
-(defn by-day
-  [{date :contribution/date-created}]
-  (* day (quot date day)))
+(def week
+  (* 7 day))
+
+(def month
+  (* 31 day))
+
+(defn by
+  [interval {date :contribution/date-created}]
+  (* interval (quot date interval)))
 
 (defn counter
   [[day contributions]]
@@ -44,7 +50,7 @@
            label :label
            from :from
            to :to} (om/props this)
-          data (map counter (group-by by-day c))]
+          data (map counter (group-by (partial by week) c))]
       (dom/div #js {:style s-container}
         (dom/div #js {:style s-title-container}
           (dom/h2 #js {:style s-title} label))
