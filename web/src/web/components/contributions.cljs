@@ -27,21 +27,11 @@
 
 (defn by-day
   [{date :contribution/date-created}]
-  (quot date day))
+  (* day (quot date day)))
 
 (defn counter
   [[day contributions]]
   [day (count contributions)])
-
-(defn fill
-  [acc value]
-  (if (empty? acc)
-    (conj acc value)
-    (let [lday (+ 1 (first (last acc)))
-          day (first value)]
-      (if (= day lday)
-        (conj acc value)
-        (fill (conj acc [lday 0]) value)))))
 
 (defui Contributions
   static om/IQuery
@@ -54,14 +44,13 @@
            label :label
            from :from
            to :to} (om/props this)
-          data (sort-by first (group-by by-day c))
-          counts (map counter data)
-          filled (reduce fill [] counts)]
+          data (map counter (group-by by-day c))]
       (dom/div #js {:style s-container}
         (dom/div #js {:style s-title-container}
           (dom/h2 #js {:style s-title} label))
         (dom/div #js {:style s-chart}
-          (chart {:points filled}))))))
-
+          (chart {:data data
+                  :from from
+                  :to to}))))))
 
 (def contributions (om/factory Contributions {:keyfn :id}))

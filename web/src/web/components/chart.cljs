@@ -1,6 +1,8 @@
 (ns web.components.chart
   (:require [om.dom :as dom]
-            [om.next :as om :refer-macros [defui]]))
+            [om.next :as om :refer-macros [defui]]
+            [web.scale :as scale]
+            [web.styles :as styles]))
 
 (def s-chart
   (clj->js {:backgroundColor "#EEE"
@@ -10,25 +12,25 @@
 
 (def height 160)
 
-(defn toSVGPoints
-  [width height total x [_ y]]
-  (let [itemGutterX (/ width total)
-        offsetX (/ itemGutterX 2)
-        itemGutterY (/ height 5)
-        offsetY (/ itemGutterY 2)]
-    (dom/circle #js {:key x
-                     :cx (+ offsetX (* x itemGutterX))
-                     :cy (- height (+ offsetY (* y itemGutterY)))
-                     :r 5
-                     :fill "white"
-                     :stroke "grey"
-                     :strokeWidth "2"})))
+(defn rect
+  [x-scale y-scale [x y]]
+  (dom/rect #js {:key x
+                 :width 5
+                 :height (- height (y-scale y))
+                 :x (x-scale x)
+                 :y (y-scale y)
+                 :fill styles/c-primary}))
 
 (defui Chart
   Object
   (render [this]
-    (let [{points :points} (om/props this)]
+    (let [{data :data
+           from :from
+           to :to} (om/props this)
+          max-count (apply max 4 (map second data))
+          y-scale (scale/linear 0 max-count height 0)
+          x-scale (scale/linear from to 0 width)]
       (dom/svg #js {:width width :height height :style s-chart}
-        (dom/g nil (map-indexed (partial toSVGPoints width height (count points)) points))))))
+        (map (partial rect x-scale y-scale) data)))))
 
 (def chart (om/factory Chart))
