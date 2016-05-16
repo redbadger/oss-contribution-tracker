@@ -29,7 +29,8 @@
 (d/transact! conn
   [{:db/id -1
     :app/date-from (coerce/to-long "2015-09-01")
-    :app/date-to (coerce/to-long "2016-01-01")}])
+    :app/date-to (coerce/to-long "2016-01-01")
+    :app/interval :interval/week}])
 
 (defn to-db-user
   [name]

@@ -22,22 +22,9 @@
 (def s-chart
   (clj->js {:width "480px"}))
 
-(def day
-  (* 24 (* 60 (* 60 1000))))
-
-(def week
-  (* 7 day))
-
-(def month
-  (* 31 day))
-
-(defn by
-  [interval {date :contribution/date-created}]
-  (* interval (quot date interval)))
-
 (defn counter
-  [[day contributions]]
-  [day (count contributions)])
+  [[time contributions]]
+  [time (count contributions)])
 
 (defui Contributions
   static om/IQuery
@@ -49,8 +36,9 @@
     (let [{c :contributions
            label :label
            from :from
-           to :to} (om/props this)
-          data (map counter (group-by (partial by week) c))]
+           to :to
+           interval :interval} (om/props this)
+          data (map counter (group-by interval c))]
       (dom/div #js {:style s-container}
         (dom/div #js {:style s-title-container}
           (dom/h2 #js {:style s-title} label))
