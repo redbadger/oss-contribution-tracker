@@ -1,4 +1,4 @@
-(ns ^:figwheel-always web.time-test
+(ns web.time-test
   (:require [cljs.test :refer-macros [deftest is]]
             [cljs-time.core :as core]
             [cljs-time.coerce :as coerce]
@@ -7,6 +7,21 @@
 (defn date
   [& args]
   (coerce/to-long (apply core/date-time args)))
+
+(deftest floor-day
+  "round to the time at midnight"
+  (let [actual-day (time/floor-day (date 2016 1 1 5 43 21))]
+    (is (= (date 2016 1 1) actual-day))))
+
+(deftest floor-week
+  "round to sunday of the week"
+  (let [actual-week (time/floor-week (date 2016 1 1 5 43 21))]
+    (is (= (date 2015 12 27) actual-week))))
+
+(deftest floor-month
+  "round to the start of the month"
+  (let [actual-month (time/floor-month (date 2016 1 12 5 43 21))]
+    (is (= (date 2016 1 1) actual-month))))
 
 (def expected-days
   [(date 2016 1 1)
