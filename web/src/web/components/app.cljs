@@ -15,33 +15,20 @@
 (def s-title
   (clj->js styles/f2))
 
-(def day
-  (* 24 (* 60 (* 60 1000))))
-
-(def week
-  (* 7 day))
-
-(def month
-  (* 31 day))
-
-(defn by
-  [interval {date :contribution/date-created}]
-  (* interval (quot date interval)))
-
-(def intervals
-  {:interval/day ["Day" (partial by day)]
-   :interval/week ["Week" (partial by week)]
-   :interval/month ["Month" (partial by month)]})
-
-(defn interval-option
-  [[key [label _]]]
-  (dom/option #js {:key key
-                   :value (named key)}
-    label))
+(def labels
+  {:interval/day "Day"
+   :interval/week "Week"
+   :interval/month "Month"})
 
 (defn named
   [keyword]
   (subs (str keyword) 1))
+
+(defn interval-option
+  [[key label]]
+  (dom/option #js {:key key
+                   :value (named key)}
+    label))
 
 (defn user-contributions
   [from to interval index {u :user/name c :contribution/_user}]
@@ -85,8 +72,8 @@
   (render [this]
     (let [{c :contributions
            u :users
-           {from :app/date-from to :app/date-to i :app/interval} :app} (om/props this)
-          [label interval] (get intervals i)]
+           {from :app/date-from to :app/date-to interval :app/interval} :app} (om/props this)
+          label (get labels interval)]
       (dom/div #js {:style s-app}
         (dom/h1 #js {:style s-title} "OSS Contribution Tracker")
         (dom/div nil
@@ -99,9 +86,9 @@
                           :value (to-date to)
                           :onChange #(handle-change % this :app/date-to from-date)})
           (dom/span nil " Interval ")
-          (dom/select #js {:value (named i)
+          (dom/select #js {:value (named interval)
                            :onChange #(handle-change % this :app/interval keyword)}
-            (map interval-option (seq intervals))))
+            (map interval-option (seq labels))))
         (contributions {:id 0
                         :contributions c
                         :label "Red Badger"
