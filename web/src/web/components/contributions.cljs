@@ -50,7 +50,9 @@
           [floor range] (get intervals interval)
           data (map counter (group-by (partial by floor) c))
           max-count (apply max 4 (map second data))
-          x-scale (partial scale/linear from to)
+          x-range (range from to)
+          x-count (count x-range)
+          x-scale (partial scale/ordinal x-range)
           y-scale (partial scale/linear 0 max-count)]
       (dom/div #js {:style s-container}
         (dom/div #js {:style s-title-container}
@@ -58,6 +60,7 @@
         (dom/div #js {:style s-chart}
           (chart {:data data
                   :x-scale x-scale
-                  :y-scale y-scale}))))))
+                  :y-scale y-scale
+                  :x-count x-count}))))))
 
 (def contributions (om/factory Contributions {:keyfn :id}))
