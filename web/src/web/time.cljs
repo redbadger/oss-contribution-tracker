@@ -14,7 +14,8 @@
 
 (defn- dt-floor-week
   [dt]
-  (dt-floor-day (time/minus dt (time/days (time/day-of-week dt)))))
+  (let [day (mod (time/day-of-week dt) 7)]
+    (dt-floor-day (time/minus dt (time/days day)))))
 
 (defn floor-week
   "round to the sunday of the current week"
@@ -38,7 +39,7 @@
     (map coerce/to-long
       (p/periodic-seq
         (dt-floor-day min)
-        (dt-floor-day max)
+        max
         (time/days 1)))))
 
 (defn week-range
@@ -49,7 +50,7 @@
     (map coerce/to-long
       (p/periodic-seq
         (dt-floor-week min)
-        (dt-floor-week max)
+        max
         (time/weeks 1)))))
 
 (defn month-range
@@ -60,5 +61,5 @@
     (map coerce/to-long
       (p/periodic-seq
         (dt-floor-month min)
-        (dt-floor-month max)
+        max
         (time/months 1)))))
